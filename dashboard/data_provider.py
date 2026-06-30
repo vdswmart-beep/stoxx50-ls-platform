@@ -10,9 +10,7 @@ logger = logging.getLogger("DashboardDataProvider")
 
 # NAV paper trading (modifiable via .env ou ici)
 import os
-PAPER_NAV_USD = float(os.getenv("PAPER_NAV", "1000000"))   # $1M USD par défaut
-USD_JPY       = float(os.getenv("USD_JPY", "157.34"))
-PAPER_NAV_JPY = PAPER_NAV_USD * USD_JPY                     # ≈ ¥157.34M
+PAPER_NAV_EUR = float(os.getenv("PAPER_NAV", "1000000"))   # €1M EUR par défaut
 
 
 class DashboardDataProvider:
@@ -32,10 +30,10 @@ class DashboardDataProvider:
         self.target_weights: Dict[str, float] = {}
         self._last_prices: Dict[str, float] = {}
         self._last_backtest = backtest_result
-        self.paper_nav = PAPER_NAV_JPY   # NAV paper trading en JPY
+        self.paper_nav = PAPER_NAV_EUR   # NAV paper trading en EUR
         logger.info(
             f"DataProvider init | {len(tickers)} tickers | mode={mode} | "
-            f"Paper NAV: ${PAPER_NAV_USD:,.0f} = ¥{PAPER_NAV_JPY/1e6:.1f}M"
+            f"Paper NAV: €{PAPER_NAV_EUR:,.0f}"
         )
 
     # ── Prix & Rendements ─────────────────────────────────────────
@@ -70,8 +68,12 @@ class DashboardDataProvider:
         try:
             import yfinance as yf
             df = yf.download(ticker, start=self.start, end=self.end,
-                             progress=False, auto_adjust=True)
-            df.columns = [c.lower() for c in df.columns]
+                             progress=False, auto_adjust=True,
+                             multi_level_index=False)
+            # yfinance 1.x peut renvoyer un MultiIndex même pour 1 ticker
+            if isinstance(df.columns, pd.MultiIndex):
+                df.columns = df.columns.get_level_values(0)
+            df.columns = [str(c).lower() for c in df.columns]
             return df.reset_index().rename(columns={"Date":"date","index":"date"})
         except Exception as e:
             logger.error(f"get_price_history({ticker}): {e}"); return pd.DataFrame()
@@ -80,9 +82,15 @@ class DashboardDataProvider:
         if self._last_prices: return self._last_prices
         try:
             import yfinance as yf
-            data = yf.download(self.tickers, period="2d", progress=False, auto_adjust=True)
+            data = yf.download(self.tickers, period="2d", progress=False,
+                               auto_adjust=True)
             if not data.empty:
-                close = data["Close"] if "Close" in data.columns else data
+                # yfinance 1.x : colonnes MultiIndex (Field, Ticker)
+                if isinstance(data.columns, pd.MultiIndex):
+                    lvl0 = data.columns.get_level_values(0)
+                    close = data["Close"] if "Close" in lvl0 else data
+                else:
+                    close = data["Close"] if "Close" in data.columns else data
                 if isinstance(close, pd.Series): close = close.to_frame(self.tickers[0])
                 self._last_prices = close.iloc[-1].dropna().to_dict()
         except Exception as e: logger.warning(f"get_current_prices: {e}")
@@ -177,14 +185,14 @@ class DashboardDataProvider:
             rows = [{"ticker":t, "weight":round(v,4),
                      "side":"LONG" if v>0 else "SHORT",
                      "weight_pct":f"{v:.2%}",
-                     "notional_jpy":f"¥{abs(v)*self.paper_nav/1e6:.1f}M"}
+                     "notional":f"€{abs(v)*self.paper_nav/1e6:.1f}M"}
                     for t,v in w.items() if abs(v)>1e-5]
         else:
             n = len(self.tickers)
             ew = 1.0/n if n>0 else 0
             rows = [{"ticker":t,"weight":round(ew,4),"side":"LONG",
                      "weight_pct":f"{ew:.2%}",
-                     "notional_jpy":f"¥{ew*self.paper_nav/1e6:.1f}M"}
+                     "notional":f"€{ew*self.paper_nav/1e6:.1f}M"}
                     for t in self.tickers]
         return pd.DataFrame(rows)
 
@@ -205,11 +213,11 @@ class DashboardDataProvider:
                     "vol":vol,"max_dd":mdd,
                     "n_longs":sum(1 for v in w.values() if v>0.001),
                     "n_shorts":sum(1 for v in w.values() if v<-0.001),
-                    "paper_nav_usd": self.paper_nav / USD_JPY}
+                    "paper_nav_eur": self.paper_nav}
         except Exception as e:
             logger.error(f"get_portfolio_kpis: {e}")
             return {"nav":self.paper_nav,"total_ret":0,"sharpe":0,"vol":0,"max_dd":0,
-                    "n_longs":0,"n_shorts":0,"paper_nav_usd":PAPER_NAV_USD}
+                    "n_longs":0,"n_shorts":0,"paper_nav_eur":PAPER_NAV_EUR}
 
     # ── Risk ──────────────────────────────────────────────────────
     def get_risk_metrics(self):
@@ -251,9 +259,9 @@ class DashboardDataProvider:
                 "2008 Crisis (worst 20d)": pr.nsmallest(20).sum(),
                 "COVID Crash (worst 5d)":  pr.nsmallest(5).sum(),
                 "Flash Crash (worst day)": float(pr.min()),
-                "+10% JPY appreciation":   pr.mean()*252*-0.15,
-                "BoJ rate hike +50bps":    pr.mean()*252*-0.08,
-                "Nikkei -20% scenario":    -0.20*0.85,
+                "EUR +10% (export hit)":   pr.mean()*252*-0.15,
+                "ECB rate hike +50bps":    pr.mean()*252*-0.08,
+                "EURO STOXX -20% scenario": -0.20*0.85,
             }
             return pd.DataFrame([{"scenario":k,"impact":f"{v*100:.2f}%"}
                                   for k,v in scenarios.items()])

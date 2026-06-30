@@ -1,1 +1,1 @@
-# config/brokers.py — FIXED (BUG-04: SyntaxError — newlines manquantes)IBKR_HOST      = "127.0.0.1"IBKR_PORT      = 7497        # 7496 = live TWS / 7497 = paper tradingIBKR_CLIENT_ID = 1CURRENCY       = "JPY"EXCHANGE       = "TSEJ"      # Tokyo Stock Exchange Japan
+# config/brokers.py — FIXED (BUG-04: SyntaxError — newlines manquantes)IBKR_HOST      = "127.0.0.1"IBKR_PORT      = 7497        # 7496 = live TWS / 7497 = paper tradingIBKR_CLIENT_ID = 1CURRENCY       = "EUR"EXCHANGE       = "SMART"     # IBKR SMART routing (Euronext, Xetra, etc.)

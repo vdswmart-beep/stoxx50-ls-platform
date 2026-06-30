@@ -17,7 +17,7 @@ _GRID = "rgba(255,255,255,0.04)"
 _FONT = dict(family="Inter, system-ui, sans-serif", color=_TEXT, size=11)
 _BORDER = "1px solid #1e2a38"
 
-# Moyennes sectorielles estimées (Nikkei 225, données 2024-2026)
+# Moyennes sectorielles estimées (EURO STOXX 50, 2025-2026)
 SECTOR_AVERAGES = {
     "Automotive":       {"P/E": 9.5,   "P/B": 0.9,  "ROE": 9.8,   "EV/EBITDA": 5.2,  "Div Yield": 2.8},
     "Technology":       {"P/E": 22.0,  "P/B": 3.5,  "ROE": 14.0,  "EV/EBITDA": 13.0, "Div Yield": 1.2},
@@ -45,13 +45,13 @@ def _fmt_number(v, kind="auto"):
         return str(v)
 
     if kind == "market_cap":
-        if abs(v) >= 1e12:  return f"¥{v/1e12:.2f}T"
-        if abs(v) >= 1e9:   return f"¥{v/1e9:.1f}B"
-        if abs(v) >= 1e6:   return f"¥{v/1e6:.0f}M"
-        return f"¥{v:,.0f}"
+        if abs(v) >= 1e12:  return f"€{v/1e12:.2f}T"
+        if abs(v) >= 1e9:   return f"€{v/1e9:.1f}B"
+        if abs(v) >= 1e6:   return f"€{v/1e6:.0f}M"
+        return f"€{v:,.0f}"
 
     if kind == "price":
-        return f"¥{v:,.0f}"
+        return f"€{v:,.0f}"
 
     if kind == "pct":
         return f"{v*100:.2f}%"
@@ -122,7 +122,7 @@ def _make_price_fig(df, ticker, height=360):
         x=df["date"], y=df["close"], name="Prix", mode="lines",
         line=dict(color=line_color, width=1.8),
         fill="tozeroy", fillcolor=fill_color,
-        hovertemplate="%{x|%Y-%m-%d}<br><b>¥%{y:,.0f}</b><extra></extra>",
+        hovertemplate="%{x|%Y-%m-%d}<br><b>€%{y:,.0f}</b><extra></extra>",
     ))
 
     if "volume" in df.columns:
@@ -138,14 +138,14 @@ def _make_price_fig(df, ticker, height=360):
         margin=dict(l=50, r=60, t=44, b=36), showlegend=False,
         hovermode="x unified",
         title=dict(
-            text=f"{ticker}   ¥{end_p:,.0f}   <span style='color:{line_color}'>{chg_str} (période)</span>",
+            text=f"{ticker}   €{end_p:,.0f}   <span style='color:{line_color}'>{chg_str} (période)</span>",
             font=dict(size=12, color=_TEXT), x=0, pad=dict(l=0),
         ),
         xaxis=dict(gridcolor=_GRID, linecolor="#1e2a38",
                    tickfont=dict(size=10, color=_MUTED), zeroline=False),
         yaxis=dict(gridcolor=_GRID, linecolor="#1e2a38",
                    tickfont=dict(size=10, color=_MUTED), zeroline=False,
-                   tickprefix="¥", tickformat=",.0f"),
+                   tickprefix="€", tickformat=",.0f"),
         yaxis2=dict(overlaying="y", side="right", showgrid=False, zeroline=False,
                     tickfont=dict(size=9, color="#2a3d50"),
                     range=[0, df["volume"].max()*6] if "volume" in df.columns else [0,1]),
@@ -372,7 +372,7 @@ def _make_fund_panel(info: dict, ticker: str) -> html.Div:
         summary_row,
         table,
         html.Div(
-            f"Secteur : {sector} — moyennes sectorielles estimées (Nikkei 225, 2025)",
+            f"Secteur : {sector} — moyennes sectorielles estimées (EURO STOXX 50, 2025)",
             style={"fontSize": "9px", "color": "#2e4050", "marginTop": "10px",
                    "textAlign": "right"},
         ),

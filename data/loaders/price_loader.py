@@ -1,5 +1,3 @@
-# data/loaders/price_loader.py — FIXED (BUG-07: MultiIndex yfinance robuste + normalisation colonnes)
-
 from typing import List, Optional
 import pandas as pd
 import numpy as np
@@ -18,51 +16,63 @@ class PriceLoader:
     def __init__(self, provider: BaseDataProvider):
         self.provider = provider
 
-    # ── Normalisation yfinance ──────────────────────────────────────────────
+    # ────────────────────────────────────────────────────────────────────────
+    # Normalisation yfinance
+    # ────────────────────────────────────────────────────────────────────────
     @staticmethod
     def _normalize_yfinance(df: pd.DataFrame, tickers: List[str]) -> pd.DataFrame:
         """
         Normalise le DataFrame brut de yfinance en MultiIndex (date, ticker).
 
-        yfinance >= 0.2.50 peut retourner :
-          - MultiIndex colonnes (Price, Ticker) si plusieurs tickers
-          - Index simple si un seul ticker
+        yfinance peut retourner :
+          - MultiIndex colonnes (Price, Ticker)
+          - MultiIndex colonnes (Ticker, Price)
+          - Colonnes simples si un seul ticker
+
         On standardise vers un index (date, ticker) avec colonnes OHLCV minuscules.
         """
+
         if df is None or df.empty:
             return df
 
         # Cas multi-tickers : colonnes MultiIndex
         if isinstance(df.columns, pd.MultiIndex):
-            # Niveaux possibles : (field, ticker) ou (ticker, field)
             lvl0 = df.columns.get_level_values(0).unique().tolist()
-            lvl1 = df.columns.get_level_values(1).unique().tolist()
 
-            # Déterminer lequel est le champ vs le ticker
-            ohlcv = {"Open", "High", "Low", "Close", "Volume",
-                     "open", "high", "low", "close", "volume"}
-            if set(lvl0) & ohlcv:
-                # niveau 0 = champ, niveau 1 = ticker → stack niveau 1
-                df = df.stack(level=1)
-            else:
-                # niveau 0 = ticker, niveau 1 = champ → stack niveau 0
-                df = df.stack(level=0)
+            ohlcv = {
+                "Open", "High", "Low", "Close", "Volume", "Adj Close",
+                "open", "high", "low", "close", "volume", "adj close"
+            }
+
+            # Déterminer si niveau 0 = champ ou ticker
+            try:
+                if set(lvl0) & ohlcv:
+                    # niveau 0 = champ → stack niveau 1
+                    df = df.stack(level=1, future_stack=True)
+                else:
+                    # niveau 0 = ticker → stack niveau 0
+                    df = df.stack(level=0, future_stack=True)
+            except TypeError:
+                # pandas < 2.1
+                df = df.stack(level=1) if (set(lvl0) & ohlcv) else df.stack(level=0)
 
             df.index.names = ["date", "ticker"]
 
-        # Cas un seul ticker : colonnes simples
+        # Cas mono-ticker : colonnes simples
         elif len(tickers) == 1:
             df = df.copy()
             df.index.name = "date"
             df["ticker"] = tickers[0]
             df = df.reset_index().set_index(["date", "ticker"])
 
-        # Normaliser toutes les colonnes en minuscule — FIX BUG-03
+        # Normaliser colonnes en minuscule
         df.columns = [c.lower() for c in df.columns]
 
         return df.sort_index()
 
-    # ── API publique ────────────────────────────────────────────────────────
+    # ────────────────────────────────────────────────────────────────────────
+    # API publique
+    # ────────────────────────────────────────────────────────────────────────
 
     def load_prices(
         self,
@@ -80,10 +90,15 @@ class PriceLoader:
         raw = self.provider.get_prices(tickers, start, end)
 
         if raw is None or (hasattr(raw, "empty") and raw.empty):
-            raise ValueError("Les données de prix sont vides.")
+            raise ValueError(
+                "Les données de prix sont vides. "
+                "Cause probable : yfinance obsolète (Yahoo a changé son API). "
+                "Corrigez avec : pip install -U 'yfinance>=1.5.1' curl_cffi"
+            )
 
         df = self._normalize_yfinance(raw, tickers)
 
+        # Filtrage des champs
         if fields is not None:
             fields_lower = [f.lower() for f in fields]
             missing = set(fields_lower) - set(df.columns)
@@ -93,6 +108,20 @@ class PriceLoader:
 
         # Déduplication
         df = df[~df.index.duplicated(keep="first")]
+
+        # Résilience : tickers absents
+        try:
+            got = set(df.index.get_level_values("ticker").unique())
+            missing_tk = [t for t in tickers if t not in got]
+            if missing_tk:
+                import logging
+                logging.getLogger("PriceLoader").warning(
+                    f"{len(missing_tk)}/{len(tickers)} tickers sans données "
+                    f"(ignorés) : {missing_tk[:8]}{'...' if len(missing_tk) > 8 else ''}"
+                )
+        except Exception:
+            pass
+
         return df
 
     def load_returns(
@@ -102,12 +131,7 @@ class PriceLoader:
         end:     str,
         method:  str = "simple",
     ) -> pd.DataFrame:
-        """
-        Calcule les rendements simples ou log.
-
-        Returns:
-            DataFrame (date × ticker).
-        """
+        """Calcule les rendements simples ou log."""
         prices = self.load_prices(tickers, start, end, fields=["close"])
         close  = prices["close"].unstack("ticker")
 

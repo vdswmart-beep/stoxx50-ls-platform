@@ -1,8 +1,10 @@
-# config/universe.py — P2-A: Univers Nikkei 225 complet (225 composants)
+# config/universe.py — EURO STOXX 50 (50 composants, tous en EUR)
 #
-# Sources : JPX officiel + mapping Yahoo Finance (.T suffix)
-# Dernière mise à jour : juin 2026
-# Pour forcer un refresh dynamique : python -c "from config.universe import refresh_universe; refresh_universe()"
+# Source : composition officielle STOXX au rebalancement du 22 septembre 2025
+# Mapping Yahoo Finance vérifié (suffixes .DE Frankfurt, .PA Paris, .AS Amsterdam,
+#   .MC Madrid, .MI Milan, .BR Bruxelles, .HE Helsinki)
+# Avantage vs Nikkei : une seule devise (EUR), couverture Yahoo Finance complète,
+#   meilleures données fondamentales sur les large caps européennes.
 
 from __future__ import annotations
 import logging
@@ -11,455 +13,131 @@ from typing import Dict, List
 logger = logging.getLogger("Universe")
 
 # ═══════════════════════════════════════════════════════════════════
-#  225 COMPOSANTS — Nikkei 225
-#  Format : ticker Yahoo Finance (code.T)
+#  50 COMPOSANTS — EURO STOXX 50
 # ═══════════════════════════════════════════════════════════════════
 
-NIKKEI_225: List[str] = [
-    # ── Automobile (7) ────────────────────────────────────────────
-    "7203.T",  # Toyota Motor
-    "7267.T",  # Honda Motor
-    "7201.T",  # Nissan Motor
-    "7269.T",  # Suzuki Motor
-    "7270.T",  # Subaru
-    "7261.T",  # Mazda Motor
-    "7211.T",  # Mitsubishi Motors
-    # ── Pièces auto / Équipements (6) ─────────────────────────────
-    "7259.T",  # Aisin
-    "7240.T",  # NOK
-    "7282.T",  # Toyoda Gosei
-    "5108.T",  # Bridgestone
-    "5101.T",  # Yokohama Rubber
-    "7276.T",  # Koito Manufacturing
-    # ── Technologie / Semiconducteurs (14) ────────────────────────
-    "6758.T",  # Sony Group
-    "6861.T",  # Keyence
-    "8035.T",  # Tokyo Electron
-    "6954.T",  # Fanuc
-    "6981.T",  # Murata Manufacturing
-    "6971.T",  # Kyocera
-    "6752.T",  # Panasonic
-    "6501.T",  # Hitachi
-    "6702.T",  # Fujitsu
-    "6762.T",  # TDK
-    "6857.T",  # Advantest
-    "6594.T",  # Nidec (Nidec Corp)
-    "6645.T",  # Omron
-    "6841.T",  # Yokogawa Electric
-    # ── Électronique grand public / Optique (8) ───────────────────
-    "7741.T",  # Hoya
-    "7733.T",  # Olympus
-    "7731.T",  # Nikon
-    "7752.T",  # Ricoh
-    "6952.T",  # Casio Computer
-    "6448.T",  # Brother Industries
-    "4902.T",  # Konica Minolta
-    "7751.T",  # Canon
-    # ── Telecom / Internet (5) ────────────────────────────────────
-    "9984.T",  # SoftBank Group
-    "9432.T",  # NTT
-    "9433.T",  # KDDI
-    "9613.T",  # NTT Data
-    "4689.T",  # Z Holdings (Yahoo Japan / LINE)
-    # ── Financials — Banques (6) ──────────────────────────────────
-    "8306.T",  # MUFG
-    "8316.T",  # Sumitomo Mitsui FG
-    "8411.T",  # Mizuho Financial
-    "8308.T",  # Resona Holdings
-    "8309.T",  # Sumitomo Mitsui Trust
-    "8331.T",  # Chiba Bank
-    # ── Financials — Assurance / Divers (8) ──────────────────────
-    "8766.T",  # Tokio Marine Holdings
-    "8750.T",  # Dai-ichi Life
-    "8725.T",  # MS&AD Insurance
-    "8795.T",  # T&D Holdings
-    "8604.T",  # Nomura Holdings
-    "8601.T",  # Daiwa Securities
-    "8591.T",  # Orix
-    "8253.T",  # Credit Saison
-    # ── Commerce de détail / Consommation (8) ────────────────────
-    "9983.T",  # Fast Retailing (Uniqlo)
-    "3382.T",  # Seven & i Holdings
-    "8267.T",  # Aeon
-    "3099.T",  # Isetan Mitsukoshi
-    "3086.T",  # J. Front Retailing
-    "8233.T",  # Takashimaya
-    "2670.T",  # ABC-Mart
-    "3087.T",  # Doutor Nichires
-    # ── Pharma / Santé (10) ───────────────────────────────────────
-    "4519.T",  # Chugai Pharmaceutical
-    "4502.T",  # Takeda Pharmaceutical
-    "4503.T",  # Astellas Pharma
-    "4568.T",  # Daiichi Sankyo
-    "4523.T",  # Eisai
-    "4528.T",  # Ono Pharmaceutical
-    "4507.T",  # Shionogi
-    "4543.T",  # Terumo
-    "4151.T",  # Kyowa Kirin
-    "4578.T",  # Otsuka Holdings
-    # ── Matériaux / Chimie (15) ───────────────────────────────────
-    "4063.T",  # Shin-Etsu Chemical
-    "4188.T",  # Mitsubishi Chemical
-    "4452.T",  # Kao Corporation
-    "4005.T",  # Sumitomo Chemical
-    "3402.T",  # Toray Industries
-    "3407.T",  # Asahi Kasei
-    "4088.T",  # Air Water
-    "4061.T",  # Denka
-    "4631.T",  # DIC
-    "4185.T",  # JSR (Shin-Etsu group)
-    "3405.T",  # Kuraray
-    "4203.T",  # Sumitomo Bakelite
-    "4208.T",  # Ube Industries
-    "4901.T",  # Fujifilm Holdings
-    "4183.T",  # Mitsui Chemicals
-    # ── Sidérurgie / Métaux (7) ───────────────────────────────────
-    "5401.T",  # Nippon Steel
-    "5411.T",  # JFE Holdings
-    "5406.T",  # Kobe Steel
-    "5631.T",  # Japan Steel Works
-    "5713.T",  # Sumitomo Metal Mining
-    "5706.T",  # Mitsui Mining & Smelting
-    "5901.T",  # Toyo Seikan
-    # ── Machinerie / Industrie lourde (15) ───────────────────────
-    "6301.T",  # Komatsu
-    "6326.T",  # Kubota
-    "6367.T",  # Daikin Industries
-    "6273.T",  # SMC Corporation
-    "6503.T",  # Mitsubishi Electric
-    "6504.T",  # Fuji Electric
-    "7003.T",  # Mitsui Engineering
-    "7013.T",  # IHI
-    "7012.T",  # Kawasaki Heavy Industries
-    "7011.T",  # Mitsubishi Heavy Industries
-    "6302.T",  # Sumitomo Heavy Industries
-    "6113.T",  # Amada
-    "6586.T",  # Makita
-    "6361.T",  # Ebara
-    "6479.T",  # Minebea Mitsumi
-    # ── Roulements / Précision (5) ────────────────────────────────
-    "6471.T",  # NSK
-    "6472.T",  # NTN
-    "6474.T",  # Nachi-Fujikoshi
-    "6268.T",  # Nabtesco
-    "6277.T",  # Hosokawa Micron
-    # ── Alimentation / Boissons (10) ──────────────────────────────
-    "2914.T",  # Japan Tobacco
-    "2502.T",  # Asahi Group Holdings
-    "2503.T",  # Kirin Holdings
-    "2501.T",  # Sapporo Holdings
-    "2802.T",  # Ajinomoto
-    "2002.T",  # Nisshin Seifun
-    "2269.T",  # Meiji Holdings
-    "2267.T",  # Yakult Honsha
-    "2809.T",  # Kewpie
-    "2108.T",  # Nippon Beet Sugar
-    # ── Transport / Logistique (10) ───────────────────────────────
-    "9020.T",  # East Japan Railway (JR East)
-    "9022.T",  # Central Japan Railway (JR Central)
-    "9021.T",  # West Japan Railway (JR West)
-    "9201.T",  # Japan Airlines (JAL)
-    "9202.T",  # ANA Holdings
-    "9064.T",  # Yamato Holdings
-    "9147.T",  # Nippon Express Holdings
-    "9101.T",  # Nippon Yusen (NYK)
-    "9104.T",  # Mitsui OSK Lines (MOL)
-    "9107.T",  # Kawasaki Kisen (K Line)
-    # ── Immobilier (6) ────────────────────────────────────────────
-    "8802.T",  # Mitsubishi Estate
-    "8801.T",  # Mitsui Fudosan
-    "8830.T",  # Sumitomo Realty
-    "8804.T",  # Tokyo Tatemono
-    "3003.T",  # Hulic
-    "8887.T",  # Open House
-    # ── Services publics / Énergie (7) ───────────────────────────
-    "9501.T",  # Tokyo Electric Power (TEPCO)
-    "9503.T",  # Kansai Electric Power
-    "9502.T",  # Chubu Electric Power
-    "9531.T",  # Tokyo Gas
-    "9532.T",  # Osaka Gas
-    "9533.T",  # Toho Gas
-    "9519.T",  # Renova
-    # ── Négoce (7) ────────────────────────────────────────────────
-    "8058.T",  # Mitsubishi Corp
-    "8031.T",  # Mitsui & Co
-    "8053.T",  # Sumitomo Corp
-    "8001.T",  # Itochu
-    "8002.T",  # Marubeni
-    "8015.T",  # Toyota Tsusho
-    "2768.T",  # Sojitz
-    # ── Construction / BTP (8) ────────────────────────────────────
-    "1812.T",  # Kajima
-    "1802.T",  # Obayashi
-    "1803.T",  # Shimizu
-    "1801.T",  # Taisei
-    "1925.T",  # Daiwa House Industry
-    "1928.T",  # Sekisui House
-    "1911.T",  # Sumitomo Forestry
-    "5233.T",  # Taiheiyo Cement
-    # ── Verre / Céramique / Ciment (5) ───────────────────────────
-    "5201.T",  # AGC (Asahi Glass)
-    "5202.T",  # Nippon Sheet Glass
-    "5332.T",  # Toto
-    "5301.T",  # Tokai Carbon
-    "5202.T",  # — (doublon évité → remplacé)
-    # ── Papier / Emballage (4) ────────────────────────────────────
-    "3861.T",  # Oji Holdings
-    "3863.T",  # Nippon Paper Industries
-    "3880.T",  # Daio Paper
-    "3941.T",  # Rengo
-    # ── Media / Publicité / Jeux (6) ─────────────────────────────
-    "4324.T",  # Dentsu Group
-    "2433.T",  # Hakuhodo DY Holdings
-    "9602.T",  # Toho
-    "9601.T",  # Shochiku
-    "9468.T",  # Kadokawa
-    "3765.T",  # GungHo Online Entertainment
-    # ── IT / Services (6) ────────────────────────────────────────
-    "4307.T",  # Nomura Research Institute (NRI)
-    "9432.T",  # NTT (déjà listé — fusionné)
-    "4776.T",  # Cybozu
-    "3659.T",  # Nexon
-    "3697.T",  # SHIFT
-    "4755.T",  # Rakuten Group
-    # ── Textile / Mode (4) ────────────────────────────────────────
-    "3105.T",  # Nisshinbo Holdings
-    "3441.T",  # Sanyo Shokai
-    "8016.T",  # Onward Holdings
-    "3606.T",  # Levi Strauss Japan (Levis)
+EURO_STOXX_50: List[str] = [
+    # ── Allemagne (17) ────────────────────────────────────────────
+    "ADS.DE", "ALV.DE", "BAS.DE", "BAYN.DE", "BMW.DE", "DBK.DE", "DB1.DE",
+    "DHL.DE", "DTE.DE", "IFX.DE", "MBG.DE", "MUV2.DE", "RHM.DE", "SAP.DE",
+    "SIE.DE", "ENR.DE", "VOW.DE",
+    # ── France (15) ───────────────────────────────────────────────
+    "AI.PA", "AIR.PA", "CS.PA", "BNP.PA", "BN.PA", "EL.PA", "RMS.PA",
+    "OR.PA", "MC.PA", "SAF.PA", "SGO.PA", "SAN.PA", "SU.PA", "TTE.PA", "DG.PA",
+    # ── Pays-Bas (8) ──────────────────────────────────────────────
+    "ADYEN.AS", "AD.AS", "ARGX.BR", "ASML.AS", "INGA.AS", "PRX.AS",
+    "RACE.MI", "WKL.AS",
+    # ── Espagne (4) ───────────────────────────────────────────────
+    "BBVA.MC", "SAN.MC", "IBE.MC", "ITX.MC",
+    # ── Italie (4) ────────────────────────────────────────────────
+    "ENEL.MI", "ENI.MI", "ISP.MI", "UCG.MI",
+    # ── Belgique (1) ──────────────────────────────────────────────
+    "ABI.BR",
+    # ── Finlande (1) ──────────────────────────────────────────────
+    "NDA-FI.HE",
 ]
 
-# Dédoublonnage (au cas où)
-_seen: set = set()
-_deduped: list = []
-for _t in NIKKEI_225:
-    if _t not in _seen:
-        _seen.add(_t)
-        _deduped.append(_t)
-NIKKEI_225 = _deduped
+# Alias de compatibilité : l'ancien code référence NIKKEI_225
+NIKKEI_225 = EURO_STOXX_50
 
 
 # ═══════════════════════════════════════════════════════════════════
-#  NOMS & MÉTADONNÉES
+#  NOMS COMPLETS
 # ═══════════════════════════════════════════════════════════════════
 
 TICKER_NAMES: Dict[str, str] = {
-    "7203.T": "Toyota Motor",            "7267.T": "Honda Motor",
-    "7201.T": "Nissan Motor",            "7269.T": "Suzuki Motor",
-    "7270.T": "Subaru",                  "7261.T": "Mazda Motor",
-    "7211.T": "Mitsubishi Motors",       "7259.T": "Aisin",
-    "7240.T": "NOK",                     "7282.T": "Toyoda Gosei",
-    "5108.T": "Bridgestone",             "5101.T": "Yokohama Rubber",
-    "7276.T": "Koito Manufacturing",     "6758.T": "Sony Group",
-    "6861.T": "Keyence",                 "8035.T": "Tokyo Electron",
-    "6954.T": "Fanuc",                   "6981.T": "Murata Manufacturing",
-    "6971.T": "Kyocera",                 "6752.T": "Panasonic",
-    "6501.T": "Hitachi",                 "6702.T": "Fujitsu",
-    "6762.T": "TDK",                     "6857.T": "Advantest",
-    "6594.T": "Nidec",                   "6645.T": "Omron",
-    "6841.T": "Yokogawa Electric",       "7741.T": "Hoya",
-    "7733.T": "Olympus",                 "7731.T": "Nikon",
-    "7752.T": "Ricoh",                   "6952.T": "Casio Computer",
-    "6448.T": "Brother Industries",      "4902.T": "Konica Minolta",
-    "7751.T": "Canon",                   "9984.T": "SoftBank Group",
-    "9432.T": "NTT",                     "9433.T": "KDDI",
-    "9613.T": "NTT Data",               "4689.T": "Z Holdings",
-    "8306.T": "MUFG",                    "8316.T": "Sumitomo Mitsui FG",
-    "8411.T": "Mizuho Financial",        "8308.T": "Resona Holdings",
-    "8309.T": "Sumitomo Mitsui Trust",   "8331.T": "Chiba Bank",
-    "8766.T": "Tokio Marine",            "8750.T": "Dai-ichi Life",
-    "8725.T": "MS&AD Insurance",         "8795.T": "T&D Holdings",
-    "8604.T": "Nomura Holdings",         "8601.T": "Daiwa Securities",
-    "8591.T": "Orix",                    "8253.T": "Credit Saison",
-    "9983.T": "Fast Retailing",          "3382.T": "Seven & i Holdings",
-    "8267.T": "Aeon",                    "3099.T": "Isetan Mitsukoshi",
-    "3086.T": "J. Front Retailing",      "8233.T": "Takashimaya",
-    "2670.T": "ABC-Mart",               "3087.T": "Doutor Nichires",
-    "4519.T": "Chugai Pharma",           "4502.T": "Takeda Pharma",
-    "4503.T": "Astellas Pharma",         "4568.T": "Daiichi Sankyo",
-    "4523.T": "Eisai",                   "4528.T": "Ono Pharmaceutical",
-    "4507.T": "Shionogi",               "4543.T": "Terumo",
-    "4151.T": "Kyowa Kirin",             "4578.T": "Otsuka Holdings",
-    "4063.T": "Shin-Etsu Chemical",      "4188.T": "Mitsubishi Chemical",
-    "4452.T": "Kao Corporation",         "4005.T": "Sumitomo Chemical",
-    "3402.T": "Toray Industries",        "3407.T": "Asahi Kasei",
-    "4088.T": "Air Water",               "4061.T": "Denka",
-    "4631.T": "DIC",                     "4185.T": "JSR",
-    "3405.T": "Kuraray",                 "4203.T": "Sumitomo Bakelite",
-    "4208.T": "Ube Industries",          "4901.T": "Fujifilm Holdings",
-    "4183.T": "Mitsui Chemicals",        "5401.T": "Nippon Steel",
-    "5411.T": "JFE Holdings",            "5406.T": "Kobe Steel",
-    "5631.T": "Japan Steel Works",       "5713.T": "Sumitomo Metal Mining",
-    "5706.T": "Mitsui Mining & Smelting","5901.T": "Toyo Seikan",
-    "6301.T": "Komatsu",                 "6326.T": "Kubota",
-    "6367.T": "Daikin Industries",       "6273.T": "SMC Corporation",
-    "6503.T": "Mitsubishi Electric",     "6504.T": "Fuji Electric",
-    "7003.T": "Mitsui Engineering",      "7013.T": "IHI",
-    "7012.T": "Kawasaki Heavy Ind.",     "7011.T": "Mitsubishi Heavy Ind.",
-    "6302.T": "Sumitomo Heavy Ind.",     "6113.T": "Amada",
-    "6586.T": "Makita",                  "6361.T": "Ebara",
-    "6479.T": "Minebea Mitsumi",         "6471.T": "NSK",
-    "6472.T": "NTN",                     "6474.T": "Nachi-Fujikoshi",
-    "6268.T": "Nabtesco",                "6277.T": "Hosokawa Micron",
-    "2914.T": "Japan Tobacco",           "2502.T": "Asahi Group",
-    "2503.T": "Kirin Holdings",          "2501.T": "Sapporo Holdings",
-    "2802.T": "Ajinomoto",               "2002.T": "Nisshin Seifun",
-    "2269.T": "Meiji Holdings",          "2267.T": "Yakult Honsha",
-    "2809.T": "Kewpie",                  "2108.T": "Nippon Beet Sugar",
-    "9020.T": "East Japan Railway",      "9022.T": "Central Japan Railway",
-    "9021.T": "West Japan Railway",      "9201.T": "Japan Airlines",
-    "9202.T": "ANA Holdings",            "9064.T": "Yamato Holdings",
-    "9147.T": "Nippon Express",          "9101.T": "Nippon Yusen",
-    "9104.T": "Mitsui OSK Lines",        "9107.T": "Kawasaki Kisen",
-    "8802.T": "Mitsubishi Estate",       "8801.T": "Mitsui Fudosan",
-    "8830.T": "Sumitomo Realty",         "8804.T": "Tokyo Tatemono",
-    "3003.T": "Hulic",                   "8887.T": "Open House",
-    "9501.T": "Tokyo Electric Power",    "9503.T": "Kansai Electric Power",
-    "9502.T": "Chubu Electric Power",    "9531.T": "Tokyo Gas",
-    "9532.T": "Osaka Gas",               "9533.T": "Toho Gas",
-    "9519.T": "Renova",                  "8058.T": "Mitsubishi Corp",
-    "8031.T": "Mitsui & Co",             "8053.T": "Sumitomo Corp",
-    "8001.T": "Itochu",                  "8002.T": "Marubeni",
-    "8015.T": "Toyota Tsusho",           "2768.T": "Sojitz",
-    "1812.T": "Kajima",                  "1802.T": "Obayashi",
-    "1803.T": "Shimizu",                 "1801.T": "Taisei",
-    "1925.T": "Daiwa House Industry",    "1928.T": "Sekisui House",
-    "1911.T": "Sumitomo Forestry",       "5233.T": "Taiheiyo Cement",
-    "5201.T": "AGC",                     "5332.T": "Toto",
-    "5301.T": "Tokai Carbon",            "3861.T": "Oji Holdings",
-    "3863.T": "Nippon Paper Industries", "3880.T": "Daio Paper",
-    "3941.T": "Rengo",                   "4324.T": "Dentsu Group",
-    "2433.T": "Hakuhodo DY",             "9602.T": "Toho",
-    "9601.T": "Shochiku",                "9468.T": "Kadokawa",
-    "3765.T": "GungHo Online",           "4307.T": "NRI",
-    "4776.T": "Cybozu",                  "3659.T": "Nexon",
-    "3697.T": "SHIFT",                   "4755.T": "Rakuten Group",
-    "3105.T": "Nisshinbo Holdings",      "8016.T": "Onward Holdings",
-    "3606.T": "Levis Japan",
+    "ADS.DE": "Adidas", "ALV.DE": "Allianz", "BAS.DE": "BASF", "BAYN.DE": "Bayer",
+    "BMW.DE": "BMW", "DBK.DE": "Deutsche Bank", "DB1.DE": "Deutsche Börse",
+    "DHL.DE": "DHL Group", "DTE.DE": "Deutsche Telekom", "IFX.DE": "Infineon Technologies",
+    "MBG.DE": "Mercedes-Benz Group", "MUV2.DE": "Munich Re", "RHM.DE": "Rheinmetall",
+    "SAP.DE": "SAP", "SIE.DE": "Siemens", "ENR.DE": "Siemens Energy",
+    "VOW.DE": "Volkswagen Group",
+    "AI.PA": "Air Liquide", "AIR.PA": "Airbus", "CS.PA": "AXA", "BNP.PA": "BNP Paribas",
+    "BN.PA": "Danone", "EL.PA": "EssilorLuxottica", "RMS.PA": "Hermès", "OR.PA": "L'Oréal",
+    "MC.PA": "LVMH", "SAF.PA": "Safran", "SGO.PA": "Saint-Gobain", "SAN.PA": "Sanofi",
+    "SU.PA": "Schneider Electric", "TTE.PA": "TotalEnergies", "DG.PA": "Vinci",
+    "ADYEN.AS": "Adyen", "AD.AS": "Ahold Delhaize", "ARGX.BR": "Argenx",
+    "ASML.AS": "ASML Holding", "INGA.AS": "ING Group", "PRX.AS": "Prosus",
+    "RACE.MI": "Ferrari", "WKL.AS": "Wolters Kluwer",
+    "BBVA.MC": "BBVA", "SAN.MC": "Banco Santander", "IBE.MC": "Iberdrola",
+    "ITX.MC": "Inditex",
+    "ENEL.MI": "Enel", "ENI.MI": "Eni", "ISP.MI": "Intesa Sanpaolo", "UCG.MI": "UniCredit",
+    "ABI.BR": "Anheuser-Busch InBev",
+    "NDA-FI.HE": "Nordea Bank",
 }
 
+
+# ═══════════════════════════════════════════════════════════════════
+#  SECTEURS (GICS-like)
+# ═══════════════════════════════════════════════════════════════════
 
 SECTOR_MAP: Dict[str, str] = {
-    # Automobile
-    **{t: "Automotive" for t in [
-        "7203.T","7267.T","7201.T","7269.T","7270.T","7261.T","7211.T",
-        "7259.T","7240.T","7282.T","5108.T","5101.T","7276.T",
-    ]},
-    # Technologie
-    **{t: "Technology" for t in [
-        "6758.T","6861.T","8035.T","6954.T","6981.T","6971.T","6752.T",
-        "6501.T","6702.T","6762.T","6857.T","6594.T","6645.T","6841.T",
-        "7741.T","7733.T","7731.T","7752.T","6952.T","6448.T","4902.T","7751.T",
-    ]},
-    # Telecom
-    **{t: "Telecom" for t in ["9984.T","9432.T","9433.T","9613.T","4689.T"]},
-    # Financials
-    **{t: "Financials" for t in [
-        "8306.T","8316.T","8411.T","8308.T","8309.T","8331.T",
-        "8766.T","8750.T","8725.T","8795.T","8604.T","8601.T","8591.T","8253.T",
-    ]},
-    # Consumer
-    **{t: "Consumer" for t in [
-        "9983.T","3382.T","8267.T","3099.T","3086.T","8233.T","2670.T","3087.T",
-    ]},
-    # Healthcare
-    **{t: "Healthcare" for t in [
-        "4519.T","4502.T","4503.T","4568.T","4523.T","4528.T",
-        "4507.T","4543.T","4151.T","4578.T",
-    ]},
-    # Materials
-    **{t: "Materials" for t in [
-        "4063.T","4188.T","4452.T","4005.T","3402.T","3407.T","4088.T","4061.T",
-        "4631.T","4185.T","3405.T","4203.T","4208.T","4901.T","4183.T",
-        "5401.T","5411.T","5406.T","5631.T","5713.T","5706.T","5901.T",
-        "5201.T","5332.T","5301.T","3861.T","3863.T","3880.T","3941.T","5233.T",
-    ]},
-    # Industrials
-    **{t: "Industrials" for t in [
-        "6301.T","6326.T","6367.T","6273.T","6503.T","6504.T","7003.T","7013.T",
-        "7012.T","7011.T","6302.T","6113.T","6586.T","6361.T","6479.T",
-        "6471.T","6472.T","6474.T","6268.T","6277.T",
-    ]},
-    # Consumer Staples
-    **{t: "Consumer Staples" for t in [
-        "2914.T","2502.T","2503.T","2501.T","2802.T","2002.T",
-        "2269.T","2267.T","2809.T","2108.T",
-    ]},
-    # Transport
-    **{t: "Transport" for t in [
-        "9020.T","9022.T","9021.T","9201.T","9202.T",
-        "9064.T","9147.T","9101.T","9104.T","9107.T",
-    ]},
-    # Real Estate
-    **{t: "Real Estate" for t in [
-        "8802.T","8801.T","8830.T","8804.T","3003.T","8887.T",
-    ]},
-    # Utilities
-    **{t: "Utilities" for t in [
-        "9501.T","9503.T","9502.T","9531.T","9532.T","9533.T","9519.T",
-    ]},
-    # Trading
-    **{t: "Trading" for t in [
-        "8058.T","8031.T","8053.T","8001.T","8002.T","8015.T","2768.T",
-    ]},
-    # Construction
-    **{t: "Construction" for t in [
-        "1812.T","1802.T","1803.T","1801.T","1925.T","1928.T","1911.T",
-    ]},
-    # Media / IT
-    **{t: "Media/IT" for t in [
-        "4324.T","2433.T","9602.T","9601.T","9468.T","3765.T",
-        "4307.T","4776.T","3659.T","3697.T","4755.T",
-    ]},
-    # Textile
-    **{t: "Textile" for t in ["3105.T","8016.T","3606.T"]},
+    "ADS.DE": "Consumer Discretionary", "BMW.DE": "Consumer Discretionary",
+    "MBG.DE": "Consumer Discretionary", "VOW.DE": "Consumer Discretionary",
+    "RMS.PA": "Consumer Discretionary", "MC.PA": "Consumer Discretionary",
+    "RACE.MI": "Consumer Discretionary", "ITX.MC": "Consumer Discretionary",
+    "PRX.AS": "Consumer Discretionary",
+    "BN.PA": "Consumer Staples", "OR.PA": "Consumer Staples",
+    "AD.AS": "Consumer Staples", "ABI.BR": "Consumer Staples",
+    "ALV.DE": "Financials", "DBK.DE": "Financials", "DB1.DE": "Financials",
+    "MUV2.DE": "Financials", "CS.PA": "Financials", "BNP.PA": "Financials",
+    "BBVA.MC": "Financials", "SAN.MC": "Financials", "INGA.AS": "Financials",
+    "ISP.MI": "Financials", "UCG.MI": "Financials", "ADYEN.AS": "Financials",
+    "NDA-FI.HE": "Financials",
+    "BAYN.DE": "Health Care", "EL.PA": "Health Care", "SAN.PA": "Health Care",
+    "ARGX.BR": "Health Care",
+    "AIR.PA": "Industrials", "SAF.PA": "Industrials", "SGO.PA": "Industrials",
+    "SU.PA": "Industrials", "SIE.DE": "Industrials", "ENR.DE": "Industrials",
+    "DG.PA": "Industrials", "DHL.DE": "Industrials", "RHM.DE": "Industrials",
+    "WKL.AS": "Industrials",
+    "SAP.DE": "Information Technology", "IFX.DE": "Information Technology",
+    "ASML.AS": "Information Technology",
+    "BAS.DE": "Materials", "AI.PA": "Materials",
+    "TTE.PA": "Energy", "ENI.MI": "Energy",
+    "IBE.MC": "Utilities", "ENEL.MI": "Utilities",
+    "DTE.DE": "Communication Services",
+}
+
+
+SECTOR_AVERAGES: Dict[str, Dict[str, float]] = {
+    "Consumer Discretionary": {"pe": 18.0, "pb": 3.2, "roe": 0.18, "oper_margin": 0.13},
+    "Consumer Staples":       {"pe": 21.0, "pb": 4.5, "roe": 0.22, "oper_margin": 0.16},
+    "Financials":             {"pe": 9.5,  "pb": 1.1, "roe": 0.12, "oper_margin": 0.35},
+    "Health Care":            {"pe": 20.0, "pb": 4.0, "roe": 0.20, "oper_margin": 0.22},
+    "Industrials":            {"pe": 19.0, "pb": 3.5, "roe": 0.17, "oper_margin": 0.12},
+    "Information Technology": {"pe": 32.0, "pb": 8.0, "roe": 0.25, "oper_margin": 0.28},
+    "Materials":              {"pe": 16.0, "pb": 2.5, "roe": 0.14, "oper_margin": 0.15},
+    "Energy":                 {"pe": 8.0,  "pb": 1.2, "roe": 0.13, "oper_margin": 0.11},
+    "Utilities":              {"pe": 13.0, "pb": 1.6, "roe": 0.11, "oper_margin": 0.18},
+    "Communication Services": {"pe": 15.0, "pb": 2.0, "roe": 0.13, "oper_margin": 0.16},
 }
 
 
 # ═══════════════════════════════════════════════════════════════════
-#  UNIVERSES DE TRAVAIL
+#  SOUS-UNIVERS
 # ═══════════════════════════════════════════════════════════════════
 
-# Univers par défaut pour dev rapide (10 tickers, 1 par secteur clé)
 DEFAULT_UNIVERSE: List[str] = [
-    "7203.T",  # Toyota    — Automotive
-    "6758.T",  # Sony      — Technology
-    "9984.T",  # SoftBank  — Telecom
-    "8306.T",  # MUFG      — Financials
-    "9983.T",  # Fast Ret. — Consumer
-    "4519.T",  # Chugai    — Healthcare
-    "4063.T",  # Shin-Etsu — Materials
-    "6301.T",  # Komatsu   — Industrials
-    "2914.T",  # JT        — Consumer Staples
-    "8802.T",  # Mitsubishi Estate — Real Estate
+    "MC.PA", "ASML.AS", "SAP.DE", "TTE.PA", "SAN.PA",
+    "ALV.DE", "AIR.PA", "OR.PA", "SIE.DE", "BNP.PA",
 ]
 
-# Univers étendu (40 tickers les plus liquides)
 LIQUID_40: List[str] = [
-    "7203.T","7267.T","7201.T","7270.T","7261.T",
-    "6758.T","6861.T","8035.T","6954.T","6981.T","6501.T","6702.T","6367.T",
-    "9984.T","9432.T","9433.T",
-    "8306.T","8316.T","8411.T","8604.T","8766.T","8750.T",
-    "9983.T","3382.T","8267.T",
-    "4519.T","4502.T","4503.T","4568.T",
-    "4063.T","4188.T","4452.T","5401.T",
-    "6301.T","6326.T","7751.T",
-    "2914.T","2502.T","2503.T",
-    "8802.T",
+    "MC.PA", "ASML.AS", "SAP.DE", "TTE.PA", "SIE.DE", "OR.PA", "SAN.PA",
+    "ALV.DE", "AIR.PA", "BNP.PA", "RMS.PA", "IBE.MC", "ITX.MC", "ENEL.MI",
+    "AI.PA", "SU.PA", "DTE.DE", "SAF.PA", "BBVA.MC", "SAN.MC", "ABI.BR",
+    "ISP.MI", "UCG.MI", "BMW.DE", "MBG.DE", "BAS.DE", "ADYEN.AS", "INGA.AS",
+    "DB1.DE", "MUV2.DE", "BAYN.DE", "EL.PA", "VOW.DE", "DHL.DE", "ENI.MI",
+    "AD.AS", "BN.PA", "DG.PA", "IFX.DE", "RHM.DE",
 ]
 
 
 def get_universe(name: str = "default") -> List[str]:
-    """
-    Retourne l'univers demandé.
-
-    Args:
-        name: "default" (10), "liquid40" (40), "full" (225)
-    """
+    """Retourne l'univers demandé. name: 'default' (10), 'liquid40' (40), 'full' (50)."""
     mapping = {
         "default":  DEFAULT_UNIVERSE,
         "liquid40": LIQUID_40,
-        "full":     NIKKEI_225,
+        "full":     EURO_STOXX_50,
     }
     if name not in mapping:
         raise ValueError(f"Univers inconnu : '{name}'. Options : {list(mapping)}")
@@ -475,42 +153,20 @@ def get_name(ticker: str) -> str:
 
 
 def refresh_universe(output_path: str = None) -> List[str]:
-    """
-    Tente de récupérer dynamiquement la liste officielle depuis Wikipedia JPX.
-    Fallback sur la liste statique en cas d'échec.
-
-    Returns:
-        Liste de tickers au format Yahoo Finance (.T)
-    """
+    """Récupère dynamiquement la composition depuis Wikipedia, fallback statique."""
     try:
         import pandas as pd
-        logger.info("Fetching Nikkei 225 list from Wikipedia...")
-        tables = pd.read_html(
-            "https://en.wikipedia.org/wiki/Nikkei_225",
-            flavor="lxml",
-        )
-        # La table des composants contient généralement un code numérique
+        logger.info("Fetching EURO STOXX 50 list from Wikipedia...")
+        tables = pd.read_html("https://en.wikipedia.org/wiki/EURO_STOXX_50", flavor="lxml")
         for tbl in tables:
             cols = [str(c).lower() for c in tbl.columns]
-            if any("code" in c or "ticker" in c or "symbol" in c for c in cols):
-                code_col = tbl.columns[[i for i, c in enumerate(cols)
-                                        if "code" in c or "ticker" in c][0]]
-                codes = tbl[code_col].astype(str).str.zfill(4)
-                tickers = [f"{c}.T" for c in codes if c.isdigit()]
-                if len(tickers) >= 100:
-                    logger.info(f"Wikipedia: {len(tickers)} tickers trouvés")
-                    if output_path:
-                        with open(output_path, "w") as f:
-                            f.write("\n".join(tickers))
+            if any("ticker" in c for c in cols):
+                tick_col = tbl.columns[[i for i, c in enumerate(cols) if "ticker" in c][0]]
+                tickers = [str(t).strip() for t in tbl[tick_col]
+                           if "." in str(t) or "-" in str(t)]
+                if len(tickers) >= 40:
+                    logger.info(f"✓ {len(tickers)} tickers depuis Wikipedia")
                     return tickers
     except Exception as e:
-        logger.warning(f"Refresh dynamique échoué ({e}) — liste statique utilisée")
-
-    return NIKKEI_225
-
-
-# ═══════════════════════════════════════════════════════════════════
-#  COMPATIBILITÉ ASCENDANTE
-# ═══════════════════════════════════════════════════════════════════
-# Alias conservés pour ne pas casser les imports existants
-FULL_UNIVERSE = NIKKEI_225
+        logger.warning(f"Refresh échoué ({e}), fallback liste statique")
+    return EURO_STOXX_50

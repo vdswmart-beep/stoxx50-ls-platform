@@ -1,6 +1,0 @@
-#!/Users/martinvanderstraten/full_project/venv/bin/python3.12
-import sys
-from dash.development.build_process import renderer
-if __name__ == '__main__':
-    sys.argv[0] = sys.argv[0].removesuffix('.exe')
-    sys.exit(renderer())

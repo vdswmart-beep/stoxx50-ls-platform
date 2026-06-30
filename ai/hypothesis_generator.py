@@ -6,7 +6,7 @@ import logging
 
 logger = logging.getLogger("HypothesisGenerator")
 
-SYSTEM_PROMPT = """You are a senior quantitative equity analyst specialising in Japanese equities (Nikkei 225).
+SYSTEM_PROMPT = """You are a senior quantitative equity analyst specialising in European equities (EURO STOXX 50).
 You think rigorously, cite specific metrics, and produce structured investment hypotheses.
 Always structure your response as valid JSON with the keys defined in the user prompt.
 Be concise, specific, and grounded in the data provided.
@@ -99,7 +99,7 @@ Produce a detailed pair trade thesis:
         return self._chat([{"role": "user", "content": prompt}], temperature=0.5)
 
     def analyse_portfolio(self, portfolio_summary, risk_metrics) -> str:
-        prompt = f"""Review this Nikkei 225 long/short portfolio.
+        prompt = f"""Review this EURO STOXX 50 long/short portfolio.
 
 PORTFOLIO SUMMARY:
 {json.dumps(portfolio_summary, indent=2)}

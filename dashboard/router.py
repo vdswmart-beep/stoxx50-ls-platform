@@ -50,6 +50,8 @@ def register_router(app, dp):
             "/backtest":  "dashboard.pages.backtest_lab",
             "/execution": "dashboard.pages.execution_lab",
             "/company":   "dashboard.pages.company_analyzer",
+            "/watchlist": "dashboard.pages.watchlist",
+            "/options":   "dashboard.pages.options_lab",
         }
 
         module_path = PAGE_MAP.get(path)
@@ -80,3 +82,13 @@ def register_router(app, dp):
                           style={"color": "#8899aa", "fontSize": "11px",
                                  "padding": "0 24px"})],
             )
+
+    # ── Surlignage de la page active dans la sidebar ─────────────────
+    @app.callback(
+        Output("nav-container", "children"),
+        Input("url", "pathname"),
+    )
+    def highlight_nav(pathname):
+        from dashboard.layout import _build_nav
+        path = (pathname or "/").rstrip("/") or "/"
+        return _build_nav(path)

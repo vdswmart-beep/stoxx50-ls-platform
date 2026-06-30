@@ -48,13 +48,20 @@ class YahooDataProvider(BaseDataProvider):
         cached = self._load_cache(key)
         if cached is not None:
             return cached
-
+    
         try:
-            data = yf.download(tickers, start=start_date, end=end_date, group_by="ticker", auto_adjust=True)
+            data = yf.download(
+                tickers,
+                start=start_date,
+                end=end_date,
+                auto_adjust=False,
+                progress=False
+            )
             self._save_cache(key, data)
             return data
         except Exception as e:
             raise RuntimeError(f"Yahoo get_prices failed: {e}")
+
 
     def get_returns(self, tickers: List[str], start_date: str, end_date: str) -> pd.DataFrame:
         prices = self.get_prices(tickers, start_date, end_date)
