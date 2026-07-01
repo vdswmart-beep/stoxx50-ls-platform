@@ -27,7 +27,12 @@ def _btn(label, bid, color="#4a9eff", outline=False):
 
 
 def layout(dp=None):
-    tickers = dp.tickers if dp and hasattr(dp, "tickers") else []
+    try:
+        from config.universe import EURO_STOXX_50
+        # + tickers US pour tester l'exécution (données US gratuites en paper)
+        tickers = EURO_STOXX_50 + ["JPM", "AAPL", "MSFT"]
+    except Exception:
+        tickers = dp.tickers if dp and hasattr(dp, "tickers") else []
 
     # Mode badge
     mode_bar = html.Div([
@@ -71,7 +76,7 @@ def layout(dp=None):
                 dcc.Input(id="exec-qty", type="number", min=1, step=1, value=100, style=_INP),
             ]), width=2),
             dbc.Col(html.Div([
-                html.Div("PRIX LIMITE (¥)", style=_LABEL),
+                html.Div("PRIX LIMITE (€)", style=_LABEL),
                 dcc.Input(id="exec-limit-price", type="number", min=0,
                           placeholder="Auto (Market)", style=_INP),
             ]), width=3),

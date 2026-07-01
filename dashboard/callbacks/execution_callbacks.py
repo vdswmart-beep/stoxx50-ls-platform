@@ -47,6 +47,9 @@ def register_execution_callbacks(app, dp, exec_engine=None):
     # Détection du type de moteur
     is_ibkr = hasattr(exec_engine, "is_connected")
 
+    # Cache NAV (évite d'interroger IBKR chaque seconde → contention du lock)
+    _nav_cache = {"val": None, "t": 0}
+
     # ── Badge mode ───────────────────────────────────────────────
     @app.callback(
         Output("exec-mode-badge",   "children"),
@@ -55,9 +58,18 @@ def register_execution_callbacks(app, dp, exec_engine=None):
         Input("clock-interval",     "n_intervals"),
     )
     def update_mode_badge(_clicks, _tick):
+        import time
         if is_ibkr and exec_engine.is_connected:
-            nav = exec_engine.get_account_value()
-            nav_str = f"${nav:,.0f}" if nav else ""
+            # NAV mise en cache 30s pour ne pas bloquer sur chaque tick
+            now = time.time()
+            if _nav_cache["val"] is None or (now - _nav_cache["t"]) > 30:
+                try:
+                    _nav_cache["val"] = exec_engine.get_account_value()
+                    _nav_cache["t"] = now
+                except Exception:
+                    pass
+            nav = _nav_cache["val"]
+            nav_str = f"€{nav:,.0f}" if nav else ""
             return "IBKR PAPER", f"✓ Connecté TWS  {nav_str}"
         elif is_ibkr:
             return "IBKR PAPER", "✗ TWS non connecté — paper Python actif"
@@ -77,11 +89,30 @@ def register_execution_callbacks(app, dp, exec_engine=None):
             return "Sélectionnez un ticker et une quantité pour prévisualiser l'ordre."
         qty = int(qty)
         action_color = _GREEN if action == "BUY" else _RED
+
+        # Prix de référence : un seul ticker via Yahoo (pas les 50 → pas de blocage)
+        ref = 0
         try:
-            prices = dp.get_current_prices()
-            ref    = float(prices.get(ticker, 0))
+            import yfinance as yf
+            h = yf.Ticker(ticker).history(period="2d")
+            if not h.empty:
+                ref = float(h["Close"].iloc[-1])
         except Exception:
             ref = 0
+
+        # Statut du marché selon le suffixe du ticker
+        _SUFFIX_EXCH = {".PA":"SBF",".DE":"XETRA",".AS":"AEB",".MC":"BME",
+                        ".MI":"MILAN",".BR":"BRUSSELS",".HE":"HELSINKI"}
+        exch = "NYSE"  # défaut US (JPM, AAPL, MSFT sans suffixe)
+        for suf, ex in _SUFFIX_EXCH.items():
+            if ticker.endswith(suf):
+                exch = ex; break
+        try:
+            from dashboard.utils.market_hours import status_dot as _sd
+            mkt_dot = _sd(exch)
+        except Exception:
+            mkt_dot = html.Span()
+
         notional = qty * (float(limit_price) if limit_price else ref)
         parts = [
             html.Span(f"{action} ", style={"color":action_color,"fontWeight":"700"}),
@@ -90,18 +121,25 @@ def register_execution_callbacks(app, dp, exec_engine=None):
             html.Span("@ "),
         ]
         if order_type == "LIMIT" and limit_price:
-            parts.append(html.Span(f"LIMIT ¥{float(limit_price):,.0f}",
+            parts.append(html.Span(f"LIMIT €{float(limit_price):,.0f}",
                                    style={"color":"#f0a500","fontWeight":"600"}))
         else:
             parts.append(html.Span("MARKET", style={"color":_MUTED}))
         if notional > 0:
-            parts.append(html.Span(f"  |  Notionnel estimé : ¥{notional:,.0f}",
+            parts.append(html.Span(f"  |  Notionnel estimé : €{notional:,.0f}",
                                    style={"color":_MUTED,"marginLeft":"8px"}))
         # Avertissement IBKR
         if is_ibkr and exec_engine.is_connected:
             parts.append(html.Span(" → IBKR PAPER",
                                    style={"color":_GREEN,"fontSize":"10px","marginLeft":"8px"}))
-        return html.Div(parts)
+        # Ligne statut marché
+        return html.Div([
+            html.Div(parts),
+            html.Div([
+                html.Span("Marché : ", style={"fontSize":"10px","color":_MUTED,"marginRight":"4px"}),
+                mkt_dot,
+            ], style={"marginTop":"8px","display":"flex","alignItems":"center"}),
+        ])
 
     # ── Valider ordre ─────────────────────────────────────────────
     @app.callback(
@@ -120,11 +158,19 @@ def register_execution_callbacks(app, dp, exec_engine=None):
         if not n or not ticker or not qty:
             raise PreventUpdate
 
-        try:
-            prices = dp.get_current_prices()
-            ref    = float(prices.get(ticker, 1000))
-        except Exception:
-            ref = 1000.0
+        logger.info(f"[Execution UI] Clic Valider : {action} {qty} {ticker} ({order_type})")
+
+        # Prix de référence : UNIQUEMENT pour le paper Python (pas pour IBKR,
+        # qui récupère son propre prix). On évite de télécharger les 50 tickers.
+        ref = 1000.0
+        if not (is_ibkr and exec_engine.is_connected):
+            try:
+                import yfinance as yf
+                h = yf.Ticker(ticker).history(period="2d")
+                if not h.empty:
+                    ref = float(h["Close"].iloc[-1])
+            except Exception:
+                ref = 1000.0
 
         current = json.loads(fills_data) if fills_data else []
 
@@ -139,7 +185,9 @@ def register_execution_callbacks(app, dp, exec_engine=None):
                     order_type = order_type,
                     limit_price= float(limit_price) if limit_price else None,
                 )
+                logger.info(f"[Execution UI] → appel execute_order pour {ticker}...")
                 fill = exec_engine.execute_order(order)
+                logger.info(f"[Execution UI] ← execute_order retourné : fill={fill is not None}")
                 if fill:
                     fill_dict = {
                         "order_id":   fill.order_id,
@@ -160,9 +208,9 @@ def register_execution_callbacks(app, dp, exec_engine=None):
                     status = html.Div([
                         html.Span("✔ IBKR FILL : ", style={"color":_GREEN}),
                         html.Span(f"{fill.action} {fill.qty:,} × {fill.ticker} "
-                                  f"@ ¥{fill.fill_price:,.0f}",
+                                  f"@ €{fill.fill_price:,.0f}",
                                   style={"color":_TEXT,"fontWeight":"600"}),
-                        html.Span(f" | Commission ¥{fill.commission:.0f}",
+                        html.Span(f" | Commission €{fill.commission:.0f}",
                                   style={"color":_MUTED}),
                     ], style={"fontSize":"12px"})
                     return status, json.dumps(current)
@@ -204,7 +252,7 @@ def register_execution_callbacks(app, dp, exec_engine=None):
                 dp._fills.append(fill_dict)
                 status = html.Div([
                     html.Span("✔ Exécuté (paper) : ", style={"color":_GREEN}),
-                    html.Span(f"{fill.action} {fill.qty:,} × {fill.ticker} @ ¥{fill.fill_price:,.0f}",
+                    html.Span(f"{fill.action} {fill.qty:,} × {fill.ticker} @ €{fill.fill_price:,.0f}",
                               style={"color":_TEXT,"fontWeight":"600"}),
                 ], style={"fontSize":"12px"})
                 return status, json.dumps(current)
@@ -252,7 +300,7 @@ def register_execution_callbacks(app, dp, exec_engine=None):
                 {"if":{"filter_query":"{status} = 'IBKR'","column_id":"status"},"color":"#4a9eff"},
             ],
         )
-        return table, f"{len(df)} fills | Notionnel ¥{total_notional:,.0f}"
+        return table, f"{len(df)} fills | Notionnel €{total_notional:,.0f}"
 
     # ── Positions (IBKR ou paper) ─────────────────────────────────
     @app.callback(

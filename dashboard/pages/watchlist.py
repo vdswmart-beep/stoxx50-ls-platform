@@ -6,6 +6,13 @@ import pandas as pd
 import numpy as np
 import plotly.graph_objects as go
 
+try:
+    from dashboard.utils.market_hours import status_dot as _mkt_status_dot
+except Exception:
+    def _mkt_status_dot(exchange, *a, **k):
+        from dash import html
+        return html.Span()  # fallback silencieux si le module manque
+
 _BG="#0f141b";_BG2="#0a0d12";_GRID="rgba(255,255,255,0.04)"
 _TEXT="#c8d8e8";_MUTED="#7090a8";_BORDER="1px solid #1e2a38"
 _FONT=dict(family="Inter, system-ui, sans-serif",color=_TEXT,size=11)
@@ -40,6 +47,12 @@ WATCHLIST = {
                "bear":["Prix pétrole","Actifs risqués (Libye)","Pression ESG"],
                "comps":["SHEL","BP","TTE","XOM","CVX"],
                "earnings_next":"29 juillet 2026"},
+    "XNDU":  {"name":"Xanadu Quantum Technologies Ltd.","sector":"Quantum Computing / Deep Tech","exchange":"NASDAQ",
+               "currency":"USD","yf_ticker":"XNDU",
+               "thesis":"Premier pure-player coté en photonique quantique (IPO via SPAC Crane Harbor, mars 2026). Pari deep-tech long terme sur l'informatique quantique fault-tolerant. Très spéculatif : cash-burn élevé, revenus minimes.",
+               "bull":["Leader photonique quantique","IPO 2026 → $272M+ de cash","Soutien gouv. Canada/Ontario (Projet OPTIMISM)"],
+               "bear":["Perte opérationnelle Q1 -$23M","Revenus infimes ($2.8M Q1)","Dilution (facilité ATM $300M)","Techno pré-commerciale"],
+               "comps":["IONQ","RGTI","QBTS","INFQ"]},
 }
 
 # Note: on utilise "ENI-MI" (tiret) au lieu de "ENI.MI" (point) pour les IDs Dash
@@ -231,11 +244,12 @@ def _build_panel(ticker_key,config):
             ],style={"display":"flex","alignItems":"baseline","flexWrap":"wrap","gap":"4px"}),
             html.Div([
                 html.Span(config["exchange"],style={"fontSize":"10px","color":"#5a7080","marginRight":"10px"}),
-                html.Span(config["sector"],style={"fontSize":"10px","color":"#4a9eff",
+                _mkt_status_dot(config["exchange"]),
+                html.Span(config["sector"],style={"fontSize":"10px","color":"#4a9eff","marginLeft":"10px",
                     "backgroundColor":"rgba(74,158,255,.1)","border":"1px solid rgba(74,158,255,.2)",
                     "borderRadius":"4px","padding":"1px 8px"}),
                 html.Span(f"  Earnings : {earn_next}",style={"fontSize":"10px","color":"#f0a500","marginLeft":"10px"}) if earn_next else None,
-            ],style={"marginTop":"4px"}),
+            ],style={"marginTop":"4px","display":"flex","alignItems":"center","flexWrap":"wrap"}),
             html.Div(ipo_note,style={"fontSize":"10px","color":"#f0a500",
                 "backgroundColor":"rgba(240,165,0,.08)","border":"1px solid rgba(240,165,0,.2)",
                 "borderRadius":"4px","padding":"3px 10px","marginTop":"6px","display":"inline-block"}) if ipo_note else None,
@@ -337,6 +351,7 @@ def layout():
         dbc.Tab(label="Intuitive Surgical (ISRG)", tab_id="ISRG",   tab_style={"minWidth":"200px"}),
         dbc.Tab(label="SpaceX (SPCX)",             tab_id="SPCX",   tab_style={"minWidth":"140px"}),
         dbc.Tab(label="Eni (ENI.MI)",              tab_id="ENI-MI", tab_style={"minWidth":"120px"}),
+        dbc.Tab(label="Xanadu (XNDU)",             tab_id="XNDU",   tab_style={"minWidth":"140px"}),
     ], id="watchlist-tabs", active_tab="JPM", style={"marginBottom":"14px"})
 
     return html.Div([

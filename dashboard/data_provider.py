@@ -31,10 +31,98 @@ class DashboardDataProvider:
         self._last_prices: Dict[str, float] = {}
         self._last_backtest = backtest_result
         self.paper_nav = PAPER_NAV_EUR   # NAV paper trading en EUR
+        self._exec_engine = None         # moteur IBKR (injecté en mode live)
         logger.info(
             f"DataProvider init | {len(tickers)} tickers | mode={mode} | "
             f"Paper NAV: €{PAPER_NAV_EUR:,.0f}"
         )
+
+    # ── Compte IBKR réel (mode live) ──────────────────────────────
+    def _ibkr(self):
+        """Retourne le moteur IBKR connecté, ou None."""
+        eng = self._exec_engine
+        try:
+            if eng is not None and getattr(eng, "is_connected", False):
+                return eng
+        except Exception:
+            pass
+        return None
+
+    def get_live_account(self):
+        """
+        Lit le VRAI compte IBKR paper (NAV, cash, P&L, positions).
+        Retourne None si pas connecté (mode backtest).
+        Structure : {
+            'nav': float, 'cash': float,
+            'unrealized_pnl': float, 'realized_pnl': float,
+            'positions': [{'ticker','qty','avg_cost','market_price',
+                           'market_value','unrealized_pnl','side'}, ...]
+        }
+        """
+        eng = self._ibkr()
+        if eng is None:
+            return None
+        try:
+            summary = eng.get_account_summary() or {}
+            def _val(key, default=0.0):
+                item = summary.get(key)
+                if isinstance(item, dict):
+                    try: return float(item.get("value", default))
+                    except Exception: return default
+                return default
+
+            nav = eng.get_account_value() or _val("nav", self.paper_nav)
+
+            # Positions réelles avec détail (via ib.positions())
+            positions = []
+            try:
+                ib = getattr(eng, "_ib", None)
+                if ib is not None:
+                    for p in ib.positions(eng._account_id) if eng._account_id else ib.positions():
+                        try:
+                            qty = float(p.position)
+                            if abs(qty) < 1e-9:
+                                continue
+                            sym = p.contract.symbol
+                            avg = float(p.avgCost) if p.avgCost else 0.0
+                            # avgCost IBKR = coût total par action (déjà par unité)
+                            positions.append({
+                                "ticker": sym,
+                                "qty": int(qty),
+                                "avg_cost": avg,
+                                "side": "LONG" if qty > 0 else "SHORT",
+                            })
+                        except Exception:
+                            continue
+            except Exception as e:
+                logger.debug(f"positions detail: {e}")
+
+            # Enrichir avec prix de marché + P&L via portfolio items
+            try:
+                ib = getattr(eng, "_ib", None)
+                if ib is not None:
+                    pf = {item.contract.symbol: item for item in ib.portfolio()}
+                    for pos in positions:
+                        it = pf.get(pos["ticker"])
+                        if it is not None:
+                            pos["market_price"]   = float(it.marketPrice) if it.marketPrice else None
+                            pos["market_value"]   = float(it.marketValue) if it.marketValue else None
+                            pos["unrealized_pnl"] = float(it.unrealizedPNL) if it.unrealizedPNL else None
+            except Exception as e:
+                logger.debug(f"portfolio items: {e}")
+
+            return {
+                "nav": nav,
+                "cash": _val("cash"),
+                "unrealized_pnl": _val("unrealized_pnl"),
+                "realized_pnl": _val("realized_pnl"),
+                "gross_pos": _val("gross_pos"),
+                "buying_power": _val("buying_power"),
+                "positions": positions,
+            }
+        except Exception as e:
+            logger.error(f"get_live_account: {e}")
+            return None
 
     # ── Prix & Rendements ─────────────────────────────────────────
     def get_prices(self, tickers=None, start=None, end=None):
@@ -197,7 +285,32 @@ class DashboardDataProvider:
         return pd.DataFrame(rows)
 
     def get_portfolio_kpis(self):
-        """Clés attendues par portfolio_lab.py: nav, total_ret, sharpe, vol, max_dd"""
+        """Clés attendues par portfolio_lab.py: nav, total_ret, sharpe, vol, max_dd
+
+        En mode LIVE : lit le VRAI compte IBKR (NAV, P&L, positions réelles).
+        En mode BACKTEST : simulation depuis le capital fictif.
+        """
+        # ── MODE LIVE : vrai compte IBKR ──────────────────────────
+        live = self.get_live_account()
+        if live is not None:
+            nav      = live["nav"]
+            n_pos    = len(live["positions"])
+            n_longs  = sum(1 for p in live["positions"] if p["side"] == "LONG")
+            n_shorts = sum(1 for p in live["positions"] if p["side"] == "SHORT")
+            u_pnl    = live["unrealized_pnl"]
+            # total_ret = P&L latent / (NAV - P&L) ; si pas de position → 0
+            base     = nav - u_pnl
+            tr       = (u_pnl / base * 100) if base > 0 and n_pos > 0 else 0.0
+            return {
+                "nav": nav, "total_ret": tr, "ann_ret": 0.0,
+                "sharpe": 0.0, "vol": 0.0, "max_dd": 0.0,
+                "n_longs": n_longs, "n_shorts": n_shorts,
+                "unrealized_pnl": u_pnl, "realized_pnl": live["realized_pnl"],
+                "cash": live["cash"], "paper_nav_eur": nav,
+                "is_live": True,
+            }
+
+        # ── MODE BACKTEST : simulation ────────────────────────────
         try:
             nav_df, w = self.get_portfolio()
             pr = self._compute_port_returns()
@@ -213,11 +326,11 @@ class DashboardDataProvider:
                     "vol":vol,"max_dd":mdd,
                     "n_longs":sum(1 for v in w.values() if v>0.001),
                     "n_shorts":sum(1 for v in w.values() if v<-0.001),
-                    "paper_nav_eur": self.paper_nav}
+                    "paper_nav_eur": self.paper_nav, "is_live": False}
         except Exception as e:
             logger.error(f"get_portfolio_kpis: {e}")
             return {"nav":self.paper_nav,"total_ret":0,"sharpe":0,"vol":0,"max_dd":0,
-                    "n_longs":0,"n_shorts":0,"paper_nav_eur":PAPER_NAV_EUR}
+                    "n_longs":0,"n_shorts":0,"paper_nav_eur":PAPER_NAV_EUR,"is_live":False}
 
     # ── Risk ──────────────────────────────────────────────────────
     def get_risk_metrics(self):
@@ -284,7 +397,13 @@ class DashboardDataProvider:
                 if ticker not in returns.columns: continue
                 m12 = float(mom.get(ticker, 0))
                 v   = float(vol.get(ticker, 0.2)) or 0.2
-                sc  = float(np.clip(50+30*(m12/v), 0, 100))
+                # Skip tickers sans données exploitables (NaN momentum/vol)
+                if not np.isfinite(m12) or not np.isfinite(v) or v <= 0:
+                    continue
+                raw = 50 + 30 * (m12 / v)
+                sc  = float(np.clip(raw, 0, 100))
+                if not np.isfinite(sc):
+                    sc = 50.0
                 side= "LONG" if sc>=55 else "SHORT"
                 conv= "HIGH" if abs(sc-50)>25 else "MEDIUM" if abs(sc-50)>10 else "LOW"
                 pe = roe = None

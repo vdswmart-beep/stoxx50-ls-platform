@@ -139,7 +139,7 @@ def build_layout(dp=None):
                       style={"fontSize": "11px", "color": "#7090a8",
                              "fontVariantNumeric": "tabular-nums"}),
         ], style={"display": "flex", "alignItems": "center"}),
-        dcc.Interval(id="clock-interval", interval=1000, n_intervals=0),
+        dcc.Interval(id="clock-interval", interval=2000, n_intervals=0),
     ], style={
         "position": "fixed",
         "top": "0", "left": "210px", "right": "0",

@@ -11,6 +11,34 @@ from datetime import datetime
 logger = logging.getLogger("IBKRLive")
 
 
+def _round_to_tick(price: float, action: str) -> float:
+    """
+    Arrondit un prix au 'tick size' valide selon MiFID II (approximation pratique).
+    IBKR rejette les ordres dont le prix ne respecte pas la variation minimale
+    (erreur 110). On arrondit vers le haut pour un BUY, vers le bas pour un SELL,
+    pour garder un ordre agressif qui se remplit.
+
+    Barème simplifié (actions liquides EUR) :
+      < 10€    → 0.001    |   10-50€   → 0.005
+      50-100€  → 0.01     |   100-500€ → 0.05
+      > 500€   → 0.10
+    """
+    import math
+    if   price < 10:   tick = 0.001
+    elif price < 50:   tick = 0.005
+    elif price < 100:  tick = 0.01
+    elif price < 500:  tick = 0.05
+    else:              tick = 0.10
+
+    n = price / tick
+    # BUY : arrondi au tick supérieur ; SELL : au tick inférieur
+    if action == "BUY":
+        n = math.ceil(n)
+    else:
+        n = math.floor(n)
+    return round(n * tick, 4)
+
+
 @dataclass
 class IBKRFill:
     order_id:    str
@@ -97,7 +125,7 @@ class IBKRLiveEngine:
                 self._positions = {}
                 for pos in positions:
                     sym  = pos.contract.symbol
-                    exch = (pos.contract.primaryExch or pos.contract.exchange or "").upper()
+                    exch = (pos.contract.primaryExchange or pos.contract.exchange or "").upper()
                     suffix = ""
                     for ibkr_exch, yf_suffix in EXCH_TO_SUFFIX.items():
                         if ibkr_exch in exch:
@@ -218,9 +246,48 @@ class IBKRLiveEngine:
                 contract = self._ticker_to_contract(
                     order.ticker, order.currency, order.exchange
                 )
+                # Qualifier le contrat (résout le conId, nécessaire pour les données)
+                try:
+                    self._ib.qualifyContracts(contract)
+                except Exception:
+                    pass
+
+                # ── Prix de référence (pour convertir MARKET→LIMIT si pas de données) ──
+                ref_price = None
+                if order.order_type == "MARKET":
+                    # Yahoo d'abord (rapide et fiable), IBKR en secours
+                    try:
+                        import yfinance as yf
+                        h = yf.Ticker(order.ticker).history(period="5d")
+                        if not h.empty:
+                            ref_price = float(h["Close"].iloc[-1])
+                    except Exception:
+                        pass
+                    # Secours IBKR (timeout court : 1s) si Yahoo a échoué
+                    if ref_price is None:
+                        try:
+                            tk = self._ib.reqMktData(contract, "", False, False)
+                            self._ib.sleep(1.0)
+                            for attr in ("last", "close", "bid", "ask", "marketPrice"):
+                                v = getattr(tk, attr, None)
+                                if v and v == v and v > 0:
+                                    ref_price = float(v); break
+                            self._ib.cancelMktData(contract)
+                        except Exception:
+                            pass
 
                 if order.order_type == "MARKET":
-                    ib_order = ibi.MarketOrder(order.action, order.qty)
+                    if ref_price:
+                        # Convertir en LIMIT agressif (prix marché ± marge) pour
+                        # contourner l'absence de données temps réel côté IBKR.
+                        marge = 1.01 if order.action == "BUY" else 0.99
+                        raw_px = ref_price * marge
+                        px = _round_to_tick(raw_px, order.action)
+                        ib_order = ibi.LimitOrder(order.action, order.qty, px)
+                        logger.info(f"  MARKET→LIMIT @ €{px} (réf €{ref_price:.2f}) "
+                                    f"pour contourner l'absence de données live")
+                    else:
+                        ib_order = ibi.MarketOrder(order.action, order.qty)
                 else:
                     ib_order = ibi.LimitOrder(
                         order.action, order.qty,
@@ -230,6 +297,7 @@ class IBKRLiveEngine:
                 # ── FIXES PRINCIPAUX ─────────────────────────────────
                 ib_order.outsideRth = True   # FIX 1: ordre accepté hors heures US
                 ib_order.tif        = "GTC"  # Good Till Cancelled (pas juste DAY)
+                ib_order.transmit   = True   # FIX 3: transmettre immédiatement
                 # ─────────────────────────────────────────────────────
 
                 logger.info(f"→ Placing {order.action} {order.qty} {order.ticker} "
@@ -237,22 +305,31 @@ class IBKRLiveEngine:
 
                 trade = self._ib.placeOrder(contract, ib_order)
 
-                # Attendre fill (30s max) en traitant les événements ib_insync
-                for i in range(60):
-                    self._ib.sleep(0.5)      # FIX 2: traite l'event loop ib_insync
+                # Attendre fill (6s max) — au-delà, on rend la main pour ne pas
+                # bloquer l'interface Dash. L'ordre reste actif côté IBKR (GTC).
+                for i in range(12):
+                    self._ib.sleep(0.5)      # traite l'event loop ib_insync
                     if trade.isDone():
                         logger.info(f"  → Fill confirmé après {(i+1)*0.5:.1f}s")
                         break
+                    st = trade.orderStatus.status if trade.orderStatus else ""
+                    if st == "PendingSubmit" and i == 6:
+                        logger.warning(
+                            f"Ordre {order.ticker} en PendingSubmit → marché fermé ou "
+                            f"pas de données live. L'ordre reste actif (GTC)."
+                        )
 
                 if not trade.fills:
                     status = trade.orderStatus.status if trade.orderStatus else "UNKNOWN"
                     logger.warning(f"Pas de fill — statut ordre : {status}")
-                    # Pour paper trading : simuler le fill au prix de marché
-                    if "Submitted" in status or "PreSubmitted" in status:
-                        logger.info("Ordre soumis (paper trading, fill à venir)")
-                        # Annuler et recréer en Market pour forcer le fill
-                        self._ib.cancelOrder(ib_order)
-                        self._ib.sleep(0.5)
+                    if status == "PendingSubmit":
+                        logger.info(
+                            "→ PendingSubmit = IBKR n'a pas accepté l'ordre. Marché "
+                            "fermé probable. L'ordre reste en attente (GTC) et se "
+                            "remplira à l'ouverture, ou annule-le dans TWS."
+                        )
+                    elif "Submitted" in status or "PreSubmitted" in status:
+                        logger.info("Ordre soumis (paper) — fill à l'ouverture du marché")
                     return None
 
                 last = trade.fills[-1]

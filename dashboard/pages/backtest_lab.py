@@ -15,10 +15,10 @@ def _kpi(label, vid, color):
     return html.Div([
         html.Div(label, style=_LABEL),
         html.Div(id=vid, children="—", style={
-            "fontSize":"24px","fontWeight":"700",
-            "color":color,"fontVariantNumeric":"tabular-nums",
+            "fontSize":"28px","fontWeight":"700",
+            "color":color,"fontVariantNumeric":"tabular-nums","marginTop":"6px",
         }),
-    ], style={**_CARD,"padding":"12px 16px"})
+    ], style={**_CARD,"padding":"18px 20px","minHeight":"96px"})
 
 
 def layout(dp=None):
@@ -81,8 +81,8 @@ def layout(dp=None):
         html.Div([
             html.Div("PROCHAINEMENT — Stratégies custom", style={**_LABEL,"color":"#5a7080"}),
             html.Div(
-                "Tester : Long Toyota (7203.T) / Short Honda (7267.T)  •  "
-                "Long Tech / Short Automotive  •  Paires coïntégrées",
+                "Tester : Long LVMH (MC.PA) / Short Kering  •  "
+                "Long Tech (SAP, ASML) / Short Autos  •  Paires coïntégrées",
                 style={"fontSize":"11px","color":"#3a5060","fontStyle":"italic"},
             ),
         ], style={"backgroundColor":"#090c10","border":"1px solid #141d24",

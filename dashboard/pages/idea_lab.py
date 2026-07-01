@@ -31,7 +31,15 @@ def _side_badge(side):
 
 def _mini_card(idea, is_selected=False):
     """Carte compacte dans la liste — cliquable."""
-    score = float(idea.get("score", 50))
+    import math
+    score = idea.get("score", 50)
+    try:
+        score = float(score)
+        if math.isnan(score) or math.isinf(score):
+            score = 50.0
+    except (TypeError, ValueError):
+        score = 50.0
+    score = max(0.0, min(100.0, score))   # borne 0-100
     side  = idea.get("side", "LONG")
     bar_color = "#4ade80" if side == "LONG" else "#f87171"
     border = "1px solid #4a9eff" if is_selected else "1px solid #1e2a38"
@@ -44,7 +52,7 @@ def _mini_card(idea, is_selected=False):
         ], style={"display":"flex","alignItems":"center","marginBottom":"6px"}),
 
         # Score bar
-        html.Div([html.Div(style={"height":"3px","borderRadius":"2px","backgroundColor":bar_color,"width":f"{int(score)}%"})],
+        html.Div([html.Div(style={"height":"3px","borderRadius":"2px","backgroundColor":bar_color,"width":f"{int(round(score))}%"})],
                  style={"backgroundColor":"#1a2436","borderRadius":"2px","height":"3px","marginBottom":"6px"}),
 
         html.Div([

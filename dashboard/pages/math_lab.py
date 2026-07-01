@@ -14,16 +14,23 @@ def layout():
     app = get_app()
     dp  = app.data_provider
 
-    tickers = dp.tickers
-    opts    = [{"label": t, "value": t} for t in tickers]
+    # Tous les tickers EURO STOXX 50 (indépendamment de l'univers de lancement)
+    try:
+        from config.universe import EURO_STOXX_50, TICKER_NAMES
+        tickers = EURO_STOXX_50
+        opts = [{"label": f"{t} — {TICKER_NAMES.get(t, t)}", "value": t} for t in tickers]
+    except Exception:
+        tickers = dp.tickers
+        opts    = [{"label": t, "value": t} for t in tickers]
 
-    # Exemples de paires par secteur
+    # Exemples de paires par secteur (EURO STOXX 50)
     pairs_suggestions = [
-        ("Toyota / Honda",     "7203.T", "7267.T"),
-        ("Sony / Panasonic",   "6758.T", "6752.T"),
-        ("MUFG / SMFG",        "8306.T", "8316.T"),
-        ("SoftBank / NTT",     "9984.T", "9432.T"),
-        ("Fanuc / Keyence",    "6954.T", "6861.T"),
+        ("LVMH / Hermès",        "MC.PA",  "RMS.PA"),
+        ("BNP / Santander",      "BNP.PA", "SAN.MC"),
+        ("TotalEnergies / Eni",  "TTE.PA", "ENI.MI"),
+        ("SAP / ASML",           "SAP.DE", "ASML.AS"),
+        ("BMW / Mercedes",       "BMW.DE", "MBG.DE"),
+        ("Allianz / AXA",        "ALV.DE", "CS.PA"),
     ]
     pair_btns = []
     for label, ta, tb in pairs_suggestions:

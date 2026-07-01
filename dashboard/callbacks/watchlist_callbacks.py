@@ -70,6 +70,7 @@ def _register_order_callback(app, dp, exec_engine, ticker_key, meta):
         action = "BUY" if f"wl-buy-{_safe_id(_ticker)}" in triggered else "SELL"
         qty    = int(qty or 10)
         sym    = "€" if _meta["currency"] == "EUR" else "$"
+        logger.info(f"[Watchlist UI] Clic {action} : {qty} × {_ticker}")
 
         is_ibkr = (exec_engine
                    and hasattr(exec_engine, "is_connected")

@@ -6,7 +6,8 @@ from datetime import date, timedelta
 
 import numpy as np
 import plotly.graph_objects as go
-from dash import Input, Output, State, html, ctx, ALL
+import dash_bootstrap_components as dbc
+from dash import Input, Output, State, html, dcc, ctx, ALL
 from dash.exceptions import PreventUpdate
 
 logger = logging.getLogger("OptionsCallbacks")

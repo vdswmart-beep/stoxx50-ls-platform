@@ -8,8 +8,15 @@ def layout():
     app = get_app()
     dp  = app.data_provider
 
-    tickers     = dp.tickers
-    names       = getattr(dp, "TICKER_NAMES", {})
+    try:
+        from config.universe import EURO_STOXX_50
+        tickers = EURO_STOXX_50
+    except Exception:
+        tickers = dp.tickers
+    try:
+        from config.universe import TICKER_NAMES as names
+    except Exception:
+        names = {}
     ticker_opts = [{"label": f"{t} — {names.get(t,t)}", "value": t} for t in tickers]
 
     mode_opts = [
@@ -56,7 +63,7 @@ def layout():
 
                 html.Div("Additional Context / Question", className="section-title", style={"marginTop":"8px"}),
                 dcc.Textarea(id="ai-context-input", value="",
-                             placeholder="e.g. Focus on BoJ rate impact. What's the downside if JPY strengthens 10%?",
+                             placeholder="e.g. Focus on ECB rate impact. What's the downside if the euro strengthens 10%?",
                              style=ta_style),
 
                 html.Div(style={"marginTop":"10px"}, children=[

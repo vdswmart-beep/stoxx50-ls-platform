@@ -161,25 +161,25 @@ def _row(label, company_val, sector_val=None, fmt="auto", higher_better=True,
                               sector_raw or sector_val, label, higher_better)
 
     label_cell = html.Td(label, style={
-        "fontSize": "11px", "color": _MUTED,
-        "padding": "6px 10px 6px 0", "whiteSpace": "nowrap",
+        "fontSize": "12px", "color": _MUTED,
+        "padding": "9px 10px 9px 0", "whiteSpace": "nowrap",
         "borderBottom": _BORDER,
     })
     val_cell = html.Td(company_val, style={
-        "fontSize": "12px", "color": _TEXT, "fontWeight": "500",
-        "padding": "6px 12px", "textAlign": "right",
+        "fontSize": "14px", "color": _TEXT, "fontWeight": "600",
+        "padding": "9px 12px", "textAlign": "right",
         "borderBottom": _BORDER, "fontVariantNumeric": "tabular-nums",
     })
 
     if sector_val is not None:
         sec_cell = html.Td(sector_val, style={
-            "fontSize": "11px", "color": "#5a7080",
-            "padding": "6px 8px", "textAlign": "right",
+            "fontSize": "12px", "color": "#5a7080",
+            "padding": "9px 8px", "textAlign": "right",
             "borderBottom": _BORDER, "fontVariantNumeric": "tabular-nums",
         })
         ind_cell = html.Td("▲" if color == "#4ade80" else ("▼" if color == "#f87171" else "◆"),
-                            style={"color": color, "fontSize": "10px",
-                                   "padding": "6px 4px", "borderBottom": _BORDER,
+                            style={"color": color, "fontSize": "11px",
+                                   "padding": "9px 4px", "borderBottom": _BORDER,
                                    "textAlign": "center"})
         return html.Tr([label_cell, val_cell, sec_cell, ind_cell])
     return html.Tr([label_cell, val_cell])
@@ -358,7 +358,11 @@ def _make_fund_panel(info: dict, ticker: str) -> html.Div:
                              company_raw=cr_v, sector_raw=1.0))
         # Employés
         if employees:
-            rows.append(_row("Employés", f"{int(employees):,}", None))
+            try:
+                emp_int = int(employees)
+                rows.append(_row("Employés", f"{emp_int:,}", None))
+            except (ValueError, TypeError):
+                pass
 
         return rows
 
