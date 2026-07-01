@@ -24,6 +24,9 @@ def _round_to_tick(price: float, action: str) -> float:
       > 500€   → 0.10
     """
     import math
+    # Garde NaN/None/invalide : renvoie None pour signaler "pas de prix valide"
+    if price is None or not math.isfinite(price) or price <= 0:
+        return None
     if   price < 10:   tick = 0.001
     elif price < 50:   tick = 0.005
     elif price < 100:  tick = 0.01
@@ -258,9 +261,12 @@ class IBKRLiveEngine:
                     # Yahoo d'abord (rapide et fiable), IBKR en secours
                     try:
                         import yfinance as yf
+                        import math
                         h = yf.Ticker(order.ticker).history(period="5d")
                         if not h.empty:
-                            ref_price = float(h["Close"].iloc[-1])
+                            v = float(h["Close"].iloc[-1])
+                            if math.isfinite(v) and v > 0:
+                                ref_price = v
                     except Exception:
                         pass
                     # Secours IBKR (timeout court : 1s) si Yahoo a échoué
@@ -277,17 +283,18 @@ class IBKRLiveEngine:
                             pass
 
                 if order.order_type == "MARKET":
-                    if ref_price:
-                        # Convertir en LIMIT agressif (prix marché ± marge) pour
-                        # contourner l'absence de données temps réel côté IBKR.
-                        marge = 1.01 if order.action == "BUY" else 0.99
-                        raw_px = ref_price * marge
-                        px = _round_to_tick(raw_px, order.action)
+                    px = _round_to_tick(ref_price * (1.01 if order.action == "BUY" else 0.99),
+                                        order.action) if ref_price else None
+                    if px is not None:
+                        # LIMIT agressif (prix marché ± marge) pour contourner
+                        # l'absence de données temps réel côté IBKR.
                         ib_order = ibi.LimitOrder(order.action, order.qty, px)
                         logger.info(f"  MARKET→LIMIT @ €{px} (réf €{ref_price:.2f}) "
                                     f"pour contourner l'absence de données live")
                     else:
+                        # Pas de prix de référence valide → vrai ordre MARKET
                         ib_order = ibi.MarketOrder(order.action, order.qty)
+                        logger.info(f"  Ordre MARKET (pas de prix réf disponible)")
                 else:
                     ib_order = ibi.LimitOrder(
                         order.action, order.qty,

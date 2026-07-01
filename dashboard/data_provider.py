@@ -211,20 +211,31 @@ class DashboardDataProvider:
     # ── Helpers ───────────────────────────────────────────────────
     def _compute_port_returns(self, nav_base: float = None):
         """
-        Calcule les rendements du portefeuille.
-        Si target_weights est vide → equal-weight long-only (fallback).
+        Calcule les rendements du portefeuille à partir de target_weights (L/S).
+
+        IMPORTANT : si target_weights est vide (backtest non exécuté), on renvoie
+        une série VIDE plutôt qu'un equal-weight long-only. L'ancien fallback
+        equal-weight reflétait le bêta du marché (~+64% sur 2022-2026) et pouvait
+        être pris à tort pour la performance de la stratégie L/S. Mieux vaut ne
+        rien afficher que d'afficher un chiffre trompeur.
         """
         returns = self.get_returns()
-        if returns.empty: return pd.Series(dtype=float)
+        if returns.empty:
+            return pd.Series(dtype=float)
         w = self.target_weights
         tickers = [t for t in w if t in returns.columns]
         if tickers:
             w_arr = np.array([w[t] for t in tickers], dtype=float)
             total = np.abs(w_arr).sum()
-            if total > 0: w_arr = w_arr / total
+            if total > 0:
+                w_arr = w_arr / total
             return (returns[tickers].fillna(0) * w_arr).sum(axis=1)
-        # Fallback: equal-weight long-only (indicatif seulement)
-        return returns.mean(axis=1)
+        # Pas de poids de stratégie → série vide (PAS d'equal-weight trompeur)
+        logger.warning(
+            "_compute_port_returns : aucun poids de stratégie (backtest non lancé ?). "
+            "Retour série vide au lieu d'un equal-weight qui refléterait le bêta marché."
+        )
+        return pd.Series(dtype=float)
 
     # ── Portfolio ─────────────────────────────────────────────────
     def get_portfolio(self):

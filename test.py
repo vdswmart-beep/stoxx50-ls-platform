@@ -1,64 +1,106 @@
 #!/usr/bin/env python3
-# test_order.py — teste l'exécution d'un ordre SANS le dashboard
-# Usage : place à la racine ~/STOXX50/ et lance : python test_order.py
+# test_strategies.py — compare plusieurs versions de la strategie L/S sur tes donnees
+# Usage : place a la racine ~/STOXX50/ et lance : python test_strategies.py
 
 import sys, logging
 sys.path.insert(0, ".")
-logging.basicConfig(level=logging.INFO, format="%(levelname)s | %(name)s | %(message)s")
+logging.disable(logging.CRITICAL)
+import pandas as pd, numpy as np
+from typing import Dict
 
-print("=" * 60)
-print("TEST 1 : Connexion IBKR (auto dans le constructeur)")
-print("=" * 60)
+print("=" * 70)
+print("  COMPARAISON DE STRATEGIES L/S — donnees reelles STOXX 50")
+print("=" * 70)
 
-from execution.ibkr_live import IBKRLiveEngine, IBKROrder
+from config.universe import get_universe
+from data.data_service import DataService
+from backtesting.backtest_engine import BacktestEngine
 
-# La connexion se fait automatiquement dans __init__
-engine = IBKRLiveEngine(host="127.0.0.1", port=7497, client_id=99)
+tickers = get_universe("full")
+ds = DataService(mode="backtest")
+returns = ds.get_returns(tickers, "2022-01-01", "2026-01-01")
+print(f"\nDonnees : {returns.shape[1]} tickers, {len(returns)} jours\n")
 
-# is_connected est une PROPRIÉTÉ (pas de parenthèses)
-print(f"\n→ Connecté : {engine.is_connected}")
 
-if not engine.is_connected:
-    print("❌ Pas de connexion. TWS ouvert avec API activée ?")
-    sys.exit(1)
+# ══════════════ LES STRATEGIES A COMPARER ══════════════
 
-print(f"→ NAV compte : €{engine.get_account_value():,.0f}")
-print(f"→ Positions actuelles : {engine.get_positions()}")
+def strat_baseline(returns: pd.DataFrame, top_n: int = 5) -> Dict[str, float]:
+    """ACTUELLE : momentum 12M brut, equal-weight."""
+    mom = returns.tail(252).mean(axis=0)
+    ranked = mom.sort_values(ascending=False)
+    longs, shorts = ranked.head(top_n).index, ranked.tail(top_n).index
+    w = {t: 0.5/top_n for t in longs}
+    for t in shorts: w[t] = -0.5/top_n
+    return w
 
-print("\n" + "=" * 60)
-print("TEST 2 : BUY 10 MC.PA (MARKET)")
-print("=" * 60)
 
-order = IBKROrder(
-    ticker="MC.PA", action="BUY", qty=10,
-    order_type="MARKET", currency="EUR", exchange="SBF",
-)
+def strat_skip_month(returns: pd.DataFrame, top_n: int = 5) -> Dict[str, float]:
+    """AMELIORATION 1 : momentum 12M-1M (skip dernier mois, evite le reversal)."""
+    mom = returns.tail(252).head(252-21).mean(axis=0)  # 12M sauf dernier mois
+    ranked = mom.sort_values(ascending=False)
+    longs, shorts = ranked.head(top_n).index, ranked.tail(top_n).index
+    w = {t: 0.5/top_n for t in longs}
+    for t in shorts: w[t] = -0.5/top_n
+    return w
 
-print("\n→ Envoi de l'ordre (peut prendre jusqu'à 8s)...\n")
-fill = engine.execute_order(order)
 
-if fill:
-    print(f"\n✅ ORDRE REMPLI : {fill.qty} × {fill.ticker} @ €{fill.fill_price}")
-else:
-    print(f"\n⚠️  Ordre non rempli immédiatement.")
-    print("   Regarde les logs ci-dessus : cherche 'MARKET→LIMIT' et le statut.")
+def strat_vol_weighted(returns: pd.DataFrame, top_n: int = 5) -> Dict[str, float]:
+    """AMELIORATION 2 : momentum 12M-1M + ponderation inverse-volatilite."""
+    mom = returns.tail(252).head(252-21).mean(axis=0)
+    vol = returns.tail(63).std(axis=0)  # vol recente 3M
+    ranked = mom.sort_values(ascending=False)
+    longs  = ranked.head(top_n).index.tolist()
+    shorts = ranked.tail(top_n).index.tolist()
+    # Poids inverse-vol (moins sur les actions volatiles)
+    inv_vol = {t: 1.0/vol[t] if vol[t] > 0 else 0 for t in longs+shorts}
+    long_sum  = sum(inv_vol[t] for t in longs) or 1
+    short_sum = sum(inv_vol[t] for t in shorts) or 1
+    w = {t: 0.5 * inv_vol[t]/long_sum for t in longs}
+    for t in shorts: w[t] = -0.5 * inv_vol[t]/short_sum
+    return w
 
-print(f"\n→ Positions après : {engine.get_positions()}")
 
-print("\n" + "=" * 60)
-print("TEST 3 : BUY 10 JPM (action US, MARKET)")
-print("=" * 60)
+def strat_wider(returns: pd.DataFrame, top_n: int = 8) -> Dict[str, float]:
+    """AMELIORATION 3 : skip-month + inverse-vol + PLUS de positions (8 vs 5)."""
+    return strat_vol_weighted(returns, top_n=8)
 
-order_us = IBKROrder(
-    ticker="JPM", action="BUY", qty=10,
-    order_type="MARKET", currency="USD", exchange="SMART",
-)
-print("\n→ Envoi ordre JPM...\n")
-fill_us = engine.execute_order(order_us)
-if fill_us:
-    print(f"\n✅ JPM REMPLI : {fill_us.qty} × JPM @ ${fill_us.fill_price}")
-else:
-    print(f"\n⚠️  JPM non rempli (marché US ouvre 15h30 Paris)")
 
-engine.disconnect()
-print("\n✓ Test terminé.")
+# ══════════════ COMPARAISON ══════════════
+
+strategies = {
+    "ACTUELLE (12M, equal-wt)":        (strat_baseline, 5),
+    "12M-1M skip (anti-reversal)":     (strat_skip_month, 5),
+    "12M-1M + inverse-vol":            (strat_vol_weighted, 5),
+    "12M-1M + inv-vol + 8 positions":  (strat_wider, 8),
+}
+
+results = {}
+print(f"{'Strategie':<34}{'Sharpe':>8}{'Rend.':>9}{'MaxDD':>8}{'Win%':>7}")
+print("-" * 70)
+for name, (fn, tn) in strategies.items():
+    try:
+        engine = BacktestEngine(train_months=12, test_months=3)
+        res = engine.run(returns, lambda r, f=fn, t=tn: f(r, t))
+        m = res.metrics
+        results[name] = m
+        print(f"{name:<34}{m.get('sharpe',0):>8.2f}"
+              f"{m.get('total_return',0)*100:>+8.1f}%"
+              f"{m.get('max_drawdown',0)*100:>7.1f}%"
+              f"{m.get('win_rate',0)*100:>6.0f}%")
+    except Exception as e:
+        print(f"{name:<34}  Erreur: {e}")
+
+print("-" * 70)
+
+# Meilleure par Sharpe
+if results:
+    best = max(results.items(), key=lambda x: x[1].get('sharpe', 0))
+    print(f"\n★ Meilleur Sharpe : {best[0]} ({best[1].get('sharpe',0):.2f})")
+    base_sharpe = results.get("ACTUELLE (12M, equal-wt)", {}).get('sharpe', 0)
+    best_sharpe = best[1].get('sharpe', 0)
+    if best_sharpe > base_sharpe:
+        gain = (best_sharpe - base_sharpe)
+        print(f"  Amelioration vs actuelle : +{gain:.2f} de Sharpe")
+    print(f"\n→ Dis-moi quelle strategie tu preferes, je l'integre au dashboard.")
+
+print("=" * 70)

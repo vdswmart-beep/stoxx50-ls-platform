@@ -22835,3 +22835,562 @@ AttributeError: module 'dashboard.pages.portfolio_lab' has no attribute 'layout'
 2026-07-01 21:26:24,515 | INFO     | werkzeug | 127.0.0.1 - - [01/Jul/2026 21:26:24] "POST /_dash-update-component HTTP/1.1" 200 -
 2026-07-01 21:26:33,434 | INFO     | ib_insync.ib | Disconnecting from 127.0.0.1:7497, 2.45 kB sent in 26 messages, 137 kB received in 1825 messages, session time 532 s.
 2026-07-01 21:26:33,435 | INFO     | ib_insync.client | Disconnecting
+2026-07-02 08:07:27,780 | INFO     | run_dashboard | Mode     : live
+2026-07-02 08:07:27,780 | INFO     | run_dashboard | Univers  : full → 50 tickers
+2026-07-02 08:07:27,780 | INFO     | run_dashboard | Période  : 2022-01-01 → 2026-01-01
+2026-07-02 08:07:27,780 | INFO     | run_dashboard | Stop-loss: -6% par position (automatique)
+2026-07-02 08:07:27,780 | INFO     | run_dashboard | ▶ Connexion IBKR port 7497...
+2026-07-02 08:07:28,124 | INFO     | ib_insync.client | Connecting to 127.0.0.1:7497 with clientId 1...
+2026-07-02 08:07:28,125 | INFO     | ib_insync.client | Disconnecting
+2026-07-02 08:07:28,125 | ERROR    | ib_insync.client | API connection failed: ConnectionRefusedError(61, "Connect call failed ('127.0.0.1', 7497)")
+2026-07-02 08:07:28,125 | ERROR    | ib_insync.client | Make sure API port on TWS/IBG is open
+2026-07-02 08:07:28,125 | WARNING  | IBKRLive | ✗ IBKR: [Errno 61] Connect call failed ('127.0.0.1', 7497)
+2026-07-02 08:07:28,125 | WARNING  | run_dashboard |   IBKR connecté mais pas de réponse — fallback paper Python
+2026-07-02 08:07:28,966 | INFO     | DashboardDataProvider | DataProvider init | 50 tickers | mode=live | Paper NAV: €1,000,000
+2026-07-02 08:07:29,152 | INFO     | DashApp | ✓ clock_callbacks
+2026-07-02 08:07:29,152 | INFO     | DashApp | ✓ math_callbacks
+2026-07-02 08:07:29,152 | INFO     | DashApp | ✓ company_callbacks
+2026-07-02 08:07:29,154 | INFO     | AIRouter | AI Provider détecté : none
+2026-07-02 08:07:29,154 | WARNING  | AIRouter | Aucun provider IA configuré.
+  → Groq (gratuit) : ajoutez GROQ_API_KEY=gsk_... dans .env
+  → Grok (xAI)     : ajoutez GROK_API_KEY=xai-... dans .env
+  → Ollama (local) : USE_OLLAMA=true dans .env
+2026-07-02 08:07:29,154 | INFO     | DashApp | ✓ ai_callbacks
+2026-07-02 08:07:29,155 | INFO     | DashApp | ✓ backtest_callbacks
+2026-07-02 08:07:29,157 | INFO     | DashApp | ✓ execution_callbacks
+2026-07-02 08:07:29,157 | INFO     | DashApp | ✓ idea_callbacks
+2026-07-02 08:07:29,158 | INFO     | DashApp | ✓ stop_loss_monitor (-6%)
+2026-07-02 08:07:29,158 | INFO     | DashApp | ✓ watchlist_callbacks
+2026-07-02 08:07:29,159 | INFO     | DashApp | ✓ options_callbacks
+2026-07-02 08:07:29,159 | INFO     | run_dashboard | Dashboard → http://127.0.0.1:8050  [Paper Python local]
+2026-07-02 08:07:29,159 | INFO     | dash.dash | Dash is running on http://127.0.0.1:8050/
+
+2026-07-02 08:07:29,192 | INFO     | werkzeug | [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on http://127.0.0.1:8050
+2026-07-02 08:07:29,192 | INFO     | werkzeug | [33mPress CTRL+C to quit[0m
+2026-07-02 08:07:41,213 | INFO     | werkzeug | 127.0.0.1 - - [02/Jul/2026 08:07:41] "GET / HTTP/1.1" 200 -
+2026-07-02 08:07:41,505 | INFO     | werkzeug | 127.0.0.1 - - [02/Jul/2026 08:07:41] "GET / HTTP/1.1" 200 -
+2026-07-02 08:07:41,609 | INFO     | werkzeug | 127.0.0.1 - - [02/Jul/2026 08:07:41] "GET /_dash-layout HTTP/1.1" 200 -
+2026-07-02 08:07:41,610 | INFO     | werkzeug | 127.0.0.1 - - [02/Jul/2026 08:07:41] "GET /_dash-dependencies HTTP/1.1" 200 -
+2026-07-02 08:07:41,752 | INFO     | werkzeug | 127.0.0.1 - - [02/Jul/2026 08:07:41] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-07-02 08:07:41,753 | INFO     | werkzeug | 127.0.0.1 - - [02/Jul/2026 08:07:41] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-07-02 08:07:41,755 | INFO     | werkzeug | 127.0.0.1 - - [02/Jul/2026 08:07:41] "[35m[1mPOST /_dash-update-component HTTP/1.1[0m" 204 -
+2026-07-02 08:07:43,631 | INFO     | werkzeug | 127.0.0.1 - - [02/Jul/2026 08:07:43] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-07-02 08:07:44,371 | INFO     | werkzeug | 127.0.0.1 - - [02/Jul/2026 08:07:44] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-07-02 08:07:44,387 | INFO     | werkzeug | 127.0.0.1 - - [02/Jul/2026 08:07:44] "[36mGET /_dash-component-suites/dash/dcc/async-graph.js HTTP/1.1[0m" 304 -
+2026-07-02 08:07:44,400 | INFO     | werkzeug | 127.0.0.1 - - [02/Jul/2026 08:07:44] "[36mGET /_dash-component-suites/plotly/package_data/plotly.min.js HTTP/1.1[0m" 304 -
+2026-07-02 08:07:45,643 | INFO     | werkzeug | 127.0.0.1 - - [02/Jul/2026 08:07:45] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-07-02 08:07:47,639 | INFO     | werkzeug | 127.0.0.1 - - [02/Jul/2026 08:07:47] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-07-02 08:07:49,632 | INFO     | werkzeug | 127.0.0.1 - - [02/Jul/2026 08:07:49] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-07-02 08:07:51,639 | INFO     | werkzeug | 127.0.0.1 - - [02/Jul/2026 08:07:51] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-07-02 08:07:53,642 | INFO     | werkzeug | 127.0.0.1 - - [02/Jul/2026 08:07:53] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-07-02 08:07:54,110 | INFO     | werkzeug | 127.0.0.1 - - [02/Jul/2026 08:07:54] "GET /research HTTP/1.1" 200 -
+2026-07-02 08:07:54,115 | INFO     | werkzeug | 127.0.0.1 - - [02/Jul/2026 08:07:54] "[36mGET /_dash-component-suites/dash/dash_table/async-highlight.js HTTP/1.1[0m" 304 -
+2026-07-02 08:07:54,115 | INFO     | werkzeug | 127.0.0.1 - - [02/Jul/2026 08:07:54] "[36mGET /_dash-component-suites/dash/dash_table/async-table.js HTTP/1.1[0m" 304 -
+2026-07-02 08:07:54,449 | INFO     | werkzeug | 127.0.0.1 - - [02/Jul/2026 08:07:54] "GET /_dash-layout HTTP/1.1" 200 -
+2026-07-02 08:07:54,451 | INFO     | werkzeug | 127.0.0.1 - - [02/Jul/2026 08:07:54] "GET /_dash-dependencies HTTP/1.1" 200 -
+2026-07-02 08:07:54,477 | INFO     | werkzeug | 127.0.0.1 - - [02/Jul/2026 08:07:54] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-07-02 08:07:54,478 | INFO     | werkzeug | 127.0.0.1 - - [02/Jul/2026 08:07:54] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-07-02 08:07:54,490 | INFO     | werkzeug | 127.0.0.1 - - [02/Jul/2026 08:07:54] "[35m[1mPOST /_dash-update-component HTTP/1.1[0m" 204 -
+2026-07-02 08:07:56,468 | INFO     | werkzeug | 127.0.0.1 - - [02/Jul/2026 08:07:56] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-07-02 08:07:57,024 | INFO     | werkzeug | 127.0.0.1 - - [02/Jul/2026 08:07:57] "GET /ideas HTTP/1.1" 200 -
+2026-07-02 08:07:57,351 | INFO     | werkzeug | 127.0.0.1 - - [02/Jul/2026 08:07:57] "GET /_dash-layout HTTP/1.1" 200 -
+2026-07-02 08:07:57,352 | INFO     | werkzeug | 127.0.0.1 - - [02/Jul/2026 08:07:57] "GET /_dash-dependencies HTTP/1.1" 200 -
+2026-07-02 08:07:57,369 | INFO     | werkzeug | 127.0.0.1 - - [02/Jul/2026 08:07:57] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-07-02 08:07:57,370 | INFO     | werkzeug | 127.0.0.1 - - [02/Jul/2026 08:07:57] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-07-02 08:07:57,373 | INFO     | werkzeug | 127.0.0.1 - - [02/Jul/2026 08:07:57] "[35m[1mPOST /_dash-update-component HTTP/1.1[0m" 204 -
+2026-07-02 08:07:58,138 | INFO     | werkzeug | 127.0.0.1 - - [02/Jul/2026 08:07:58] "GET /math HTTP/1.1" 200 -
+2026-07-02 08:07:58,141 | INFO     | werkzeug | 127.0.0.1 - - [02/Jul/2026 08:07:58] "[36mGET /_dash-component-suites/dash/dcc/async-dropdown.js HTTP/1.1[0m" 304 -
+2026-07-02 08:07:58,466 | INFO     | werkzeug | 127.0.0.1 - - [02/Jul/2026 08:07:58] "GET /_dash-layout HTTP/1.1" 200 -
+2026-07-02 08:07:58,467 | INFO     | werkzeug | 127.0.0.1 - - [02/Jul/2026 08:07:58] "GET /_dash-dependencies HTTP/1.1" 200 -
+2026-07-02 08:07:58,482 | INFO     | werkzeug | 127.0.0.1 - - [02/Jul/2026 08:07:58] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-07-02 08:07:58,484 | INFO     | werkzeug | 127.0.0.1 - - [02/Jul/2026 08:07:58] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-07-02 08:07:58,494 | INFO     | werkzeug | 127.0.0.1 - - [02/Jul/2026 08:07:58] "[35m[1mPOST /_dash-update-component HTTP/1.1[0m" 204 -
+2026-07-02 08:07:58,497 | INFO     | werkzeug | 127.0.0.1 - - [02/Jul/2026 08:07:58] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-07-02 08:07:58,511 | INFO     | werkzeug | 127.0.0.1 - - [02/Jul/2026 08:07:58] "[36mGET /_dash-component-suites/dash/dcc/async-graph.js HTTP/1.1[0m" 304 -
+2026-07-02 08:07:58,529 | INFO     | werkzeug | 127.0.0.1 - - [02/Jul/2026 08:07:58] "[36mGET /_dash-component-suites/plotly/package_data/plotly.min.js HTTP/1.1[0m" 304 -
+2026-07-02 08:08:00,369 | INFO     | werkzeug | 127.0.0.1 - - [02/Jul/2026 08:08:00] "GET /backtest HTTP/1.1" 200 -
+2026-07-02 08:08:00,372 | INFO     | werkzeug | 127.0.0.1 - - [02/Jul/2026 08:08:00] "[36mGET /_dash-component-suites/dash/dcc/async-slider.js HTTP/1.1[0m" 304 -
+2026-07-02 08:08:00,687 | INFO     | werkzeug | 127.0.0.1 - - [02/Jul/2026 08:08:00] "GET /_dash-layout HTTP/1.1" 200 -
+2026-07-02 08:08:00,689 | INFO     | werkzeug | 127.0.0.1 - - [02/Jul/2026 08:08:00] "GET /_dash-dependencies HTTP/1.1" 200 -
+2026-07-02 08:08:00,703 | INFO     | werkzeug | 127.0.0.1 - - [02/Jul/2026 08:08:00] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-07-02 08:08:00,705 | INFO     | werkzeug | 127.0.0.1 - - [02/Jul/2026 08:08:00] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-07-02 08:08:00,707 | INFO     | werkzeug | 127.0.0.1 - - [02/Jul/2026 08:08:00] "[35m[1mPOST /_dash-update-component HTTP/1.1[0m" 204 -
+2026-07-02 08:08:00,716 | INFO     | werkzeug | 127.0.0.1 - - [02/Jul/2026 08:08:00] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-07-02 08:08:00,735 | INFO     | werkzeug | 127.0.0.1 - - [02/Jul/2026 08:08:00] "[36mGET /_dash-component-suites/dash/dcc/async-graph.js HTTP/1.1[0m" 304 -
+2026-07-02 08:08:00,736 | INFO     | werkzeug | 127.0.0.1 - - [02/Jul/2026 08:08:00] "[36mGET /_dash-component-suites/dash/dcc/async-dropdown.js HTTP/1.1[0m" 304 -
+2026-07-02 08:08:00,740 | INFO     | werkzeug | 127.0.0.1 - - [02/Jul/2026 08:08:00] "[36mGET /_dash-component-suites/plotly/package_data/plotly.min.js HTTP/1.1[0m" 304 -
+2026-07-02 08:08:01,407 | INFO     | werkzeug | 127.0.0.1 - - [02/Jul/2026 08:08:01] "GET /portfolio HTTP/1.1" 200 -
+2026-07-02 08:08:01,410 | INFO     | werkzeug | 127.0.0.1 - - [02/Jul/2026 08:08:01] "[36mGET /_dash-component-suites/dash/dash_table/async-highlight.js HTTP/1.1[0m" 304 -
+2026-07-02 08:08:01,411 | INFO     | werkzeug | 127.0.0.1 - - [02/Jul/2026 08:08:01] "[36mGET /_dash-component-suites/dash/dash_table/async-table.js HTTP/1.1[0m" 304 -
+2026-07-02 08:08:01,717 | INFO     | werkzeug | 127.0.0.1 - - [02/Jul/2026 08:08:01] "GET /_dash-layout HTTP/1.1" 200 -
+2026-07-02 08:08:01,719 | INFO     | werkzeug | 127.0.0.1 - - [02/Jul/2026 08:08:01] "GET /_dash-dependencies HTTP/1.1" 200 -
+2026-07-02 08:08:01,733 | INFO     | werkzeug | 127.0.0.1 - - [02/Jul/2026 08:08:01] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-07-02 08:08:01,735 | INFO     | werkzeug | 127.0.0.1 - - [02/Jul/2026 08:08:01] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-07-02 08:08:01,750 | INFO     | werkzeug | 127.0.0.1 - - [02/Jul/2026 08:08:01] "[35m[1mPOST /_dash-update-component HTTP/1.1[0m" 204 -
+2026-07-02 08:08:01,787 | INFO     | werkzeug | 127.0.0.1 - - [02/Jul/2026 08:08:01] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-07-02 08:08:01,793 | INFO     | werkzeug | 127.0.0.1 - - [02/Jul/2026 08:08:01] "[36mGET /_dash-component-suites/dash/dcc/async-graph.js HTTP/1.1[0m" 304 -
+2026-07-02 08:08:01,795 | INFO     | werkzeug | 127.0.0.1 - - [02/Jul/2026 08:08:01] "[36mGET /_dash-component-suites/dash/dash_table/async-highlight.js HTTP/1.1[0m" 304 -
+2026-07-02 08:08:01,795 | INFO     | werkzeug | 127.0.0.1 - - [02/Jul/2026 08:08:01] "[36mGET /_dash-component-suites/dash/dash_table/async-table.js HTTP/1.1[0m" 304 -
+2026-07-02 08:08:01,797 | INFO     | werkzeug | 127.0.0.1 - - [02/Jul/2026 08:08:01] "[36mGET /_dash-component-suites/plotly/package_data/plotly.min.js HTTP/1.1[0m" 304 -
+2026-07-02 08:08:03,739 | INFO     | werkzeug | 127.0.0.1 - - [02/Jul/2026 08:08:03] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-07-02 08:08:05,745 | INFO     | werkzeug | 127.0.0.1 - - [02/Jul/2026 08:08:05] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-07-02 08:08:07,741 | INFO     | werkzeug | 127.0.0.1 - - [02/Jul/2026 08:08:07] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-07-02 08:08:09,744 | INFO     | werkzeug | 127.0.0.1 - - [02/Jul/2026 08:08:09] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-07-02 08:08:11,088 | INFO     | werkzeug | 127.0.0.1 - - [02/Jul/2026 08:08:11] "GET /risk HTTP/1.1" 200 -
+2026-07-02 08:08:11,090 | INFO     | werkzeug | 127.0.0.1 - - [02/Jul/2026 08:08:11] "[36mGET /_dash-component-suites/dash/dash_table/async-highlight.js HTTP/1.1[0m" 304 -
+2026-07-02 08:08:11,091 | INFO     | werkzeug | 127.0.0.1 - - [02/Jul/2026 08:08:11] "[36mGET /_dash-component-suites/dash/dash_table/async-table.js HTTP/1.1[0m" 304 -
+2026-07-02 08:08:11,418 | INFO     | werkzeug | 127.0.0.1 - - [02/Jul/2026 08:08:11] "GET /_dash-layout HTTP/1.1" 200 -
+2026-07-02 08:08:11,421 | INFO     | werkzeug | 127.0.0.1 - - [02/Jul/2026 08:08:11] "GET /_dash-dependencies HTTP/1.1" 200 -
+2026-07-02 08:08:11,438 | INFO     | werkzeug | 127.0.0.1 - - [02/Jul/2026 08:08:11] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-07-02 08:08:11,440 | INFO     | werkzeug | 127.0.0.1 - - [02/Jul/2026 08:08:11] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-07-02 08:08:11,442 | INFO     | werkzeug | 127.0.0.1 - - [02/Jul/2026 08:08:11] "[35m[1mPOST /_dash-update-component HTTP/1.1[0m" 204 -
+2026-07-02 08:08:11,470 | INFO     | werkzeug | 127.0.0.1 - - [02/Jul/2026 08:08:11] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-07-02 08:08:11,477 | INFO     | werkzeug | 127.0.0.1 - - [02/Jul/2026 08:08:11] "[36mGET /_dash-component-suites/dash/dash_table/async-highlight.js HTTP/1.1[0m" 304 -
+2026-07-02 08:08:11,478 | INFO     | werkzeug | 127.0.0.1 - - [02/Jul/2026 08:08:11] "[36mGET /_dash-component-suites/dash/dcc/async-graph.js HTTP/1.1[0m" 304 -
+2026-07-02 08:08:11,478 | INFO     | werkzeug | 127.0.0.1 - - [02/Jul/2026 08:08:11] "[36mGET /_dash-component-suites/dash/dash_table/async-table.js HTTP/1.1[0m" 304 -
+2026-07-02 08:08:11,493 | INFO     | werkzeug | 127.0.0.1 - - [02/Jul/2026 08:08:11] "[36mGET /_dash-component-suites/plotly/package_data/plotly.min.js HTTP/1.1[0m" 304 -
+2026-07-02 08:08:12,166 | INFO     | werkzeug | 127.0.0.1 - - [02/Jul/2026 08:08:12] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-07-02 08:08:13,094 | INFO     | werkzeug | 127.0.0.1 - - [02/Jul/2026 08:08:13] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-07-02 08:08:13,456 | INFO     | werkzeug | 127.0.0.1 - - [02/Jul/2026 08:08:13] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-07-02 08:08:14,404 | INFO     | werkzeug | 127.0.0.1 - - [02/Jul/2026 08:08:14] "GET /watchlist HTTP/1.1" 200 -
+2026-07-02 08:08:14,734 | INFO     | werkzeug | 127.0.0.1 - - [02/Jul/2026 08:08:14] "GET /_dash-layout HTTP/1.1" 200 -
+2026-07-02 08:08:14,735 | INFO     | werkzeug | 127.0.0.1 - - [02/Jul/2026 08:08:14] "GET /_dash-dependencies HTTP/1.1" 200 -
+2026-07-02 08:08:14,786 | INFO     | werkzeug | 127.0.0.1 - - [02/Jul/2026 08:08:14] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-07-02 08:08:14,788 | INFO     | werkzeug | 127.0.0.1 - - [02/Jul/2026 08:08:14] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-07-02 08:08:14,791 | INFO     | werkzeug | 127.0.0.1 - - [02/Jul/2026 08:08:14] "[35m[1mPOST /_dash-update-component HTTP/1.1[0m" 204 -
+2026-07-02 08:08:14,807 | INFO     | werkzeug | 127.0.0.1 - - [02/Jul/2026 08:08:14] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-07-02 08:08:15,940 | INFO     | werkzeug | 127.0.0.1 - - [02/Jul/2026 08:08:15] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-07-02 08:08:15,948 | INFO     | werkzeug | 127.0.0.1 - - [02/Jul/2026 08:08:15] "[36mGET /_dash-component-suites/dash/dcc/async-graph.js HTTP/1.1[0m" 304 -
+2026-07-02 08:08:15,950 | INFO     | werkzeug | 127.0.0.1 - - [02/Jul/2026 08:08:15] "[36mGET /_dash-component-suites/dash/dcc/async-dropdown.js HTTP/1.1[0m" 304 -
+2026-07-02 08:08:15,953 | INFO     | werkzeug | 127.0.0.1 - - [02/Jul/2026 08:08:15] "[36mGET /_dash-component-suites/plotly/package_data/plotly.min.js HTTP/1.1[0m" 304 -
+2026-07-02 08:08:16,786 | INFO     | werkzeug | 127.0.0.1 - - [02/Jul/2026 08:08:16] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-07-02 08:08:18,101 | INFO     | werkzeug | 127.0.0.1 - - [02/Jul/2026 08:08:18] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-07-02 08:08:18,795 | INFO     | werkzeug | 127.0.0.1 - - [02/Jul/2026 08:08:18] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-07-02 08:08:20,792 | INFO     | werkzeug | 127.0.0.1 - - [02/Jul/2026 08:08:20] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-07-02 08:08:22,794 | INFO     | werkzeug | 127.0.0.1 - - [02/Jul/2026 08:08:22] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-07-02 08:08:24,800 | INFO     | werkzeug | 127.0.0.1 - - [02/Jul/2026 08:08:24] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-07-02 08:08:25,237 | INFO     | werkzeug | 127.0.0.1 - - [02/Jul/2026 08:08:25] "GET /options HTTP/1.1" 200 -
+2026-07-02 08:08:25,582 | INFO     | werkzeug | 127.0.0.1 - - [02/Jul/2026 08:08:25] "GET /_dash-layout HTTP/1.1" 200 -
+2026-07-02 08:08:25,584 | INFO     | werkzeug | 127.0.0.1 - - [02/Jul/2026 08:08:25] "GET /_dash-dependencies HTTP/1.1" 200 -
+2026-07-02 08:08:25,602 | INFO     | werkzeug | 127.0.0.1 - - [02/Jul/2026 08:08:25] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-07-02 08:08:25,603 | INFO     | werkzeug | 127.0.0.1 - - [02/Jul/2026 08:08:25] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-07-02 08:08:25,611 | INFO     | werkzeug | 127.0.0.1 - - [02/Jul/2026 08:08:25] "[35m[1mPOST /_dash-update-component HTTP/1.1[0m" 204 -
+2026-07-02 08:08:25,614 | INFO     | werkzeug | 127.0.0.1 - - [02/Jul/2026 08:08:25] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-07-02 08:08:25,634 | INFO     | werkzeug | 127.0.0.1 - - [02/Jul/2026 08:08:25] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-07-02 08:08:25,644 | INFO     | werkzeug | 127.0.0.1 - - [02/Jul/2026 08:08:25] "[36mGET /_dash-component-suites/dash/dcc/async-dropdown.js HTTP/1.1[0m" 304 -
+2026-07-02 08:08:25,644 | INFO     | werkzeug | 127.0.0.1 - - [02/Jul/2026 08:08:25] "[36mGET /_dash-component-suites/dash/dcc/async-graph.js HTTP/1.1[0m" 304 -
+2026-07-02 08:08:25,655 | INFO     | werkzeug | 127.0.0.1 - - [02/Jul/2026 08:08:25] "[36mGET /_dash-component-suites/plotly/package_data/plotly.min.js HTTP/1.1[0m" 304 -
+2026-07-02 08:08:25,974 | INFO     | OptionsMockProvider | MockProvider[ASML.AS] : 252 contrats @ spot 1641.60 (vol ATM 34%, secteur Information Technology)
+2026-07-02 08:08:25,982 | INFO     | werkzeug | 127.0.0.1 - - [02/Jul/2026 08:08:25] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-07-02 08:08:27,314 | INFO     | werkzeug | 127.0.0.1 - - [02/Jul/2026 08:08:27] "GET /execution HTTP/1.1" 200 -
+2026-07-02 08:08:27,317 | INFO     | werkzeug | 127.0.0.1 - - [02/Jul/2026 08:08:27] "[36mGET /_dash-component-suites/dash/dash_table/async-highlight.js HTTP/1.1[0m" 304 -
+2026-07-02 08:08:27,318 | INFO     | werkzeug | 127.0.0.1 - - [02/Jul/2026 08:08:27] "[36mGET /_dash-component-suites/dash/dash_table/async-table.js HTTP/1.1[0m" 304 -
+2026-07-02 08:08:27,625 | INFO     | werkzeug | 127.0.0.1 - - [02/Jul/2026 08:08:27] "GET /_dash-layout HTTP/1.1" 200 -
+2026-07-02 08:08:27,626 | INFO     | werkzeug | 127.0.0.1 - - [02/Jul/2026 08:08:27] "GET /_dash-dependencies HTTP/1.1" 200 -
+2026-07-02 08:08:27,640 | INFO     | werkzeug | 127.0.0.1 - - [02/Jul/2026 08:08:27] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-07-02 08:08:27,643 | INFO     | werkzeug | 127.0.0.1 - - [02/Jul/2026 08:08:27] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-07-02 08:08:27,645 | INFO     | werkzeug | 127.0.0.1 - - [02/Jul/2026 08:08:27] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-07-02 08:08:27,646 | INFO     | werkzeug | 127.0.0.1 - - [02/Jul/2026 08:08:27] "[35m[1mPOST /_dash-update-component HTTP/1.1[0m" 204 -
+2026-07-02 08:08:27,654 | INFO     | werkzeug | 127.0.0.1 - - [02/Jul/2026 08:08:27] "[36mGET /_dash-component-suites/dash/dcc/async-dropdown.js HTTP/1.1[0m" 304 -
+2026-07-02 08:08:27,661 | INFO     | werkzeug | 127.0.0.1 - - [02/Jul/2026 08:08:27] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-07-02 08:08:27,662 | INFO     | werkzeug | 127.0.0.1 - - [02/Jul/2026 08:08:27] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-07-02 08:08:27,663 | INFO     | werkzeug | 127.0.0.1 - - [02/Jul/2026 08:08:27] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-07-02 08:08:27,664 | INFO     | werkzeug | 127.0.0.1 - - [02/Jul/2026 08:08:27] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-07-02 08:08:27,664 | INFO     | werkzeug | 127.0.0.1 - - [02/Jul/2026 08:08:27] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-07-02 08:08:28,686 | INFO     | werkzeug | 127.0.0.1 - - [02/Jul/2026 08:08:28] "GET /company HTTP/1.1" 200 -
+2026-07-02 08:08:29,022 | INFO     | werkzeug | 127.0.0.1 - - [02/Jul/2026 08:08:29] "GET /_dash-layout HTTP/1.1" 200 -
+2026-07-02 08:08:29,023 | INFO     | werkzeug | 127.0.0.1 - - [02/Jul/2026 08:08:29] "GET /_dash-dependencies HTTP/1.1" 200 -
+2026-07-02 08:08:29,042 | INFO     | werkzeug | 127.0.0.1 - - [02/Jul/2026 08:08:29] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-07-02 08:08:29,043 | INFO     | werkzeug | 127.0.0.1 - - [02/Jul/2026 08:08:29] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-07-02 08:08:29,068 | INFO     | werkzeug | 127.0.0.1 - - [02/Jul/2026 08:08:29] "[35m[1mPOST /_dash-update-component HTTP/1.1[0m" 204 -
+2026-07-02 08:08:29,079 | INFO     | werkzeug | 127.0.0.1 - - [02/Jul/2026 08:08:29] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-07-02 08:08:29,088 | INFO     | werkzeug | 127.0.0.1 - - [02/Jul/2026 08:08:29] "[36mGET /_dash-component-suites/dash/dcc/async-graph.js HTTP/1.1[0m" 304 -
+2026-07-02 08:08:29,088 | INFO     | werkzeug | 127.0.0.1 - - [02/Jul/2026 08:08:29] "[36mGET /_dash-component-suites/dash/dcc/async-dropdown.js HTTP/1.1[0m" 304 -
+2026-07-02 08:08:29,096 | INFO     | werkzeug | 127.0.0.1 - - [02/Jul/2026 08:08:29] "[36mGET /_dash-component-suites/plotly/package_data/plotly.min.js HTTP/1.1[0m" 304 -
+2026-07-02 08:08:29,561 | INFO     | werkzeug | 127.0.0.1 - - [02/Jul/2026 08:08:29] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-07-02 08:08:31,049 | INFO     | werkzeug | 127.0.0.1 - - [02/Jul/2026 08:08:31] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-07-02 08:08:32,929 | INFO     | werkzeug | 127.0.0.1 - - [02/Jul/2026 08:08:32] "GET /portfolio HTTP/1.1" 200 -
+2026-07-02 08:08:32,935 | INFO     | werkzeug | 127.0.0.1 - - [02/Jul/2026 08:08:32] "[36mGET /_dash-component-suites/dash/dash_table/async-highlight.js HTTP/1.1[0m" 304 -
+2026-07-02 08:08:32,935 | INFO     | werkzeug | 127.0.0.1 - - [02/Jul/2026 08:08:32] "[36mGET /_dash-component-suites/dash/dash_table/async-table.js HTTP/1.1[0m" 304 -
+2026-07-02 08:08:32,963 | INFO     | werkzeug | 127.0.0.1 - - [02/Jul/2026 08:08:32] "GET /_dash-layout HTTP/1.1" 200 -
+2026-07-02 08:08:32,964 | INFO     | werkzeug | 127.0.0.1 - - [02/Jul/2026 08:08:32] "GET /_dash-dependencies HTTP/1.1" 200 -
+2026-07-02 08:08:32,982 | INFO     | werkzeug | 127.0.0.1 - - [02/Jul/2026 08:08:32] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-07-02 08:08:32,983 | INFO     | werkzeug | 127.0.0.1 - - [02/Jul/2026 08:08:32] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-07-02 08:08:32,986 | INFO     | werkzeug | 127.0.0.1 - - [02/Jul/2026 08:08:32] "[35m[1mPOST /_dash-update-component HTTP/1.1[0m" 204 -
+2026-07-02 08:08:33,022 | INFO     | werkzeug | 127.0.0.1 - - [02/Jul/2026 08:08:33] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-07-02 08:08:33,029 | INFO     | werkzeug | 127.0.0.1 - - [02/Jul/2026 08:08:33] "[36mGET /_dash-component-suites/dash/dcc/async-graph.js HTTP/1.1[0m" 304 -
+2026-07-02 08:08:33,030 | INFO     | werkzeug | 127.0.0.1 - - [02/Jul/2026 08:08:33] "[36mGET /_dash-component-suites/dash/dash_table/async-highlight.js HTTP/1.1[0m" 304 -
+2026-07-02 08:08:33,030 | INFO     | werkzeug | 127.0.0.1 - - [02/Jul/2026 08:08:33] "[36mGET /_dash-component-suites/dash/dash_table/async-table.js HTTP/1.1[0m" 304 -
+2026-07-02 08:08:33,032 | INFO     | werkzeug | 127.0.0.1 - - [02/Jul/2026 08:08:33] "[36mGET /_dash-component-suites/plotly/package_data/plotly.min.js HTTP/1.1[0m" 304 -
+2026-07-02 08:08:34,989 | INFO     | werkzeug | 127.0.0.1 - - [02/Jul/2026 08:08:34] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-07-02 08:08:36,980 | INFO     | werkzeug | 127.0.0.1 - - [02/Jul/2026 08:08:36] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-07-02 08:08:38,986 | INFO     | werkzeug | 127.0.0.1 - - [02/Jul/2026 08:08:38] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-07-02 08:08:40,987 | INFO     | werkzeug | 127.0.0.1 - - [02/Jul/2026 08:08:40] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-07-02 08:08:42,983 | INFO     | werkzeug | 127.0.0.1 - - [02/Jul/2026 08:08:42] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-07-02 08:08:44,986 | INFO     | werkzeug | 127.0.0.1 - - [02/Jul/2026 08:08:44] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-07-02 08:08:46,993 | INFO     | werkzeug | 127.0.0.1 - - [02/Jul/2026 08:08:46] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-07-02 08:08:48,992 | INFO     | werkzeug | 127.0.0.1 - - [02/Jul/2026 08:08:48] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-07-02 08:08:49,641 | INFO     | werkzeug | 127.0.0.1 - - [02/Jul/2026 08:08:49] "GET / HTTP/1.1" 200 -
+2026-07-02 08:08:49,644 | INFO     | werkzeug | 127.0.0.1 - - [02/Jul/2026 08:08:49] "[36mGET /_dash-component-suites/dash/dcc/async-graph.js HTTP/1.1[0m" 304 -
+2026-07-02 08:08:49,668 | INFO     | werkzeug | 127.0.0.1 - - [02/Jul/2026 08:08:49] "[36mGET /_dash-component-suites/plotly/package_data/plotly.min.js HTTP/1.1[0m" 304 -
+2026-07-02 08:08:49,687 | INFO     | werkzeug | 127.0.0.1 - - [02/Jul/2026 08:08:49] "GET /_dash-layout HTTP/1.1" 200 -
+2026-07-02 08:08:49,689 | INFO     | werkzeug | 127.0.0.1 - - [02/Jul/2026 08:08:49] "GET /_dash-dependencies HTTP/1.1" 200 -
+2026-07-02 08:08:49,710 | INFO     | werkzeug | 127.0.0.1 - - [02/Jul/2026 08:08:49] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-07-02 08:08:49,711 | INFO     | werkzeug | 127.0.0.1 - - [02/Jul/2026 08:08:49] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-07-02 08:08:49,723 | INFO     | werkzeug | 127.0.0.1 - - [02/Jul/2026 08:08:49] "[35m[1mPOST /_dash-update-component HTTP/1.1[0m" 204 -
+2026-07-02 08:08:51,176 | INFO     | werkzeug | 127.0.0.1 - - [02/Jul/2026 08:08:51] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-07-02 08:08:51,195 | INFO     | werkzeug | 127.0.0.1 - - [02/Jul/2026 08:08:51] "[36mGET /_dash-component-suites/dash/dcc/async-graph.js HTTP/1.1[0m" 304 -
+2026-07-02 08:08:51,200 | INFO     | werkzeug | 127.0.0.1 - - [02/Jul/2026 08:08:51] "[36mGET /_dash-component-suites/plotly/package_data/plotly.min.js HTTP/1.1[0m" 304 -
+2026-07-02 08:08:51,733 | INFO     | werkzeug | 127.0.0.1 - - [02/Jul/2026 08:08:51] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-07-02 08:08:53,915 | INFO     | werkzeug | 127.0.0.1 - - [02/Jul/2026 08:08:53] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-07-02 08:08:55,927 | INFO     | werkzeug | 127.0.0.1 - - [02/Jul/2026 08:08:55] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-07-02 08:08:58,029 | INFO     | werkzeug | 127.0.0.1 - - [02/Jul/2026 08:08:58] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-07-02 08:09:00,093 | INFO     | werkzeug | 127.0.0.1 - - [02/Jul/2026 08:09:00] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-07-02 08:09:02,220 | INFO     | werkzeug | 127.0.0.1 - - [02/Jul/2026 08:09:02] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-07-02 08:09:06,170 | INFO     | werkzeug | 127.0.0.1 - - [02/Jul/2026 08:09:06] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-07-02 08:09:08,126 | INFO     | werkzeug | 127.0.0.1 - - [02/Jul/2026 08:09:08] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-07-02 08:09:10,137 | INFO     | werkzeug | 127.0.0.1 - - [02/Jul/2026 08:09:10] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-07-02 08:09:14,399 | INFO     | werkzeug | 127.0.0.1 - - [02/Jul/2026 08:09:14] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-07-02 08:09:14,794 | INFO     | werkzeug | 127.0.0.1 - - [02/Jul/2026 08:09:14] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-07-02 08:10:30,271 | INFO     | run_dashboard | Mode     : live
+2026-07-02 08:10:30,271 | INFO     | run_dashboard | Univers  : full → 50 tickers
+2026-07-02 08:10:30,271 | INFO     | run_dashboard | Période  : 2022-01-01 → 2026-01-01
+2026-07-02 08:10:30,271 | INFO     | run_dashboard | Stop-loss: -6% par position (automatique)
+2026-07-02 08:10:30,271 | INFO     | run_dashboard | ▶ Connexion IBKR port 7497...
+2026-07-02 08:10:30,437 | INFO     | ib_insync.client | Connecting to 127.0.0.1:7497 with clientId 1...
+2026-07-02 08:10:30,438 | INFO     | ib_insync.client | Connected
+2026-07-02 08:10:30,533 | INFO     | ib_insync.client | Logged on to server version 176
+2026-07-02 08:10:30,542 | INFO     | ib_insync.client | API connection ready
+2026-07-02 08:10:30,549 | INFO     | ib_insync.wrapper | Warning 2104, reqId -1: Market data farm connection is OK:hfarm
+2026-07-02 08:10:30,549 | INFO     | ib_insync.wrapper | Warning 2104, reqId -1: Market data farm connection is OK:eufarmnj
+2026-07-02 08:10:30,549 | INFO     | ib_insync.wrapper | Warning 2104, reqId -1: Market data farm connection is OK:cashfarm
+2026-07-02 08:10:30,549 | INFO     | ib_insync.wrapper | Warning 2104, reqId -1: Market data farm connection is OK:usfuture
+2026-07-02 08:10:30,549 | INFO     | ib_insync.wrapper | Warning 2104, reqId -1: Market data farm connection is OK:usopt.nj
+2026-07-02 08:10:30,549 | INFO     | ib_insync.wrapper | position: Position(account='DUQ784050', contract=Stock(conId=29816844, symbol='ENI', exchange='BVME', currency='EUR', localSymbol='ENI', tradingClass='ENI'), position=100.0, avgCost=20.305)
+2026-07-02 08:10:30,549 | INFO     | ib_insync.wrapper | Warning 2104, reqId -1: Market data farm connection is OK:jfarm
+2026-07-02 08:10:30,549 | INFO     | ib_insync.wrapper | Warning 2104, reqId -1: Market data farm connection is OK:usfarm.nj
+2026-07-02 08:10:30,549 | INFO     | ib_insync.wrapper | Warning 2104, reqId -1: Market data farm connection is OK:eufarm
+2026-07-02 08:10:30,549 | INFO     | ib_insync.wrapper | Warning 2104, reqId -1: Market data farm connection is OK:usfarm
+2026-07-02 08:10:30,550 | INFO     | ib_insync.wrapper | Warning 2106, reqId -1: HMDS data farm connection is OK:euhmds
+2026-07-02 08:10:30,551 | INFO     | ib_insync.wrapper | position: Position(account='DUQ784050', contract=Stock(conId=15085, symbol='RHM', exchange='IBIS', currency='EUR', localSymbol='RHM', tradingClass='XETRA'), position=100.0, avgCost=1030.068777)
+2026-07-02 08:10:30,551 | INFO     | ib_insync.wrapper | position: Position(account='DUQ784050', contract=Stock(conId=240601748, symbol='INGA', exchange='AEB', currency='EUR', localSymbol='INGA', tradingClass='INGA'), position=100.0, avgCost=27.295)
+2026-07-02 08:10:30,551 | INFO     | ib_insync.wrapper | position: Position(account='DUQ784050', contract=Stock(conId=29612196, symbol='SU', exchange='SBF', currency='EUR', localSymbol='SU', tradingClass='SU'), position=100.0, avgCost=279.689775)
+2026-07-02 08:10:30,551 | INFO     | ib_insync.wrapper | Warning 2106, reqId -1: HMDS data farm connection is OK:ushmds
+2026-07-02 08:10:30,551 | INFO     | ib_insync.wrapper | Warning 2106, reqId -1: HMDS data farm connection is OK:fundfarm
+2026-07-02 08:10:30,551 | INFO     | ib_insync.wrapper | Warning 2158, reqId -1: Sec-def data farm connection is OK:secdefeu
+2026-07-02 08:10:30,551 | INFO     | ib_insync.wrapper | position: Position(account='DUQ784050', contract=Stock(conId=382625193, symbol='PRX', exchange='AEB', currency='EUR', localSymbol='PRX', tradingClass='PRX'), position=100.0, avgCost=37.745)
+2026-07-02 08:10:30,551 | INFO     | ib_insync.wrapper | position: Position(account='DUQ784050', contract=Stock(conId=1520593, symbol='JPM', exchange='NYSE', currency='USD', localSymbol='JPM', tradingClass='JPM'), position=30.0, avgCost=327.470003)
+2026-07-02 08:10:30,551 | INFO     | ib_insync.wrapper | position: Position(account='DUQ784050', contract=Stock(conId=321202935, symbol='ADYEN', exchange='AEB', currency='EUR', localSymbol='ADYEN', tradingClass='ADYEN'), position=-100.0, avgCost=820.7894)
+2026-07-02 08:10:30,551 | INFO     | ib_insync.wrapper | position: Position(account='DUQ784050', contract=Stock(conId=29612150, symbol='MC', exchange='SBF', currency='EUR', localSymbol='MC', tradingClass='MC'), position=10.0, avgCost=472.45)
+2026-07-02 08:10:30,862 | INFO     | ib_insync.wrapper | updatePortfolio: PortfolioItem(contract=Stock(conId=321202935, symbol='ADYEN', right='0', primaryExchange='AEB', currency='EUR', localSymbol='ADYEN', tradingClass='ADYEN'), position=-100.0, marketPrice=844.9000244, marketValue=-84490.0, averageCost=820.7894, unrealizedPNL=-2411.06, realizedPNL=0.0, account='DUQ784050')
+2026-07-02 08:10:30,862 | INFO     | ib_insync.wrapper | updatePortfolio: PortfolioItem(contract=Stock(conId=29816844, symbol='ENI', right='0', primaryExchange='BVME', currency='EUR', localSymbol='ENI', tradingClass='ENI'), position=100.0, marketPrice=19.9920006, marketValue=1999.2, averageCost=20.305, unrealizedPNL=-31.3, realizedPNL=0.0, account='DUQ784050')
+2026-07-02 08:10:30,863 | INFO     | ib_insync.wrapper | updatePortfolio: PortfolioItem(contract=Stock(conId=240601748, symbol='INGA', right='0', primaryExchange='AEB', currency='EUR', localSymbol='INGA', tradingClass='INGA'), position=100.0, marketPrice=27.63500025, marketValue=2763.5, averageCost=27.295, unrealizedPNL=34.0, realizedPNL=0.0, account='DUQ784050')
+2026-07-02 08:10:30,863 | INFO     | ib_insync.wrapper | updatePortfolio: PortfolioItem(contract=Stock(conId=1520593, symbol='JPM', right='0', primaryExchange='NYSE', currency='USD', localSymbol='JPM', tradingClass='JPM'), position=30.0, marketPrice=334.0, marketValue=10020.0, averageCost=327.470003, unrealizedPNL=195.9, realizedPNL=0.0, account='DUQ784050')
+2026-07-02 08:10:30,863 | INFO     | ib_insync.wrapper | updatePortfolio: PortfolioItem(contract=Stock(conId=29612150, symbol='MC', right='0', primaryExchange='SBF', currency='EUR', localSymbol='MC', tradingClass='MC'), position=10.0, marketPrice=480.7000122, marketValue=4807.0, averageCost=472.45, unrealizedPNL=82.5, realizedPNL=0.0, account='DUQ784050')
+2026-07-02 08:10:30,863 | INFO     | ib_insync.wrapper | updatePortfolio: PortfolioItem(contract=Stock(conId=382625193, symbol='PRX', right='0', primaryExchange='AEB', currency='EUR', localSymbol='PRX', tradingClass='PRX'), position=100.0, marketPrice=38.56000135, marketValue=3856.0, averageCost=37.745, unrealizedPNL=81.5, realizedPNL=0.0, account='DUQ784050')
+2026-07-02 08:10:30,863 | INFO     | ib_insync.wrapper | updatePortfolio: PortfolioItem(contract=Stock(conId=15085, symbol='RHM', right='0', primaryExchange='IBIS', currency='EUR', localSymbol='RHM', tradingClass='XETRA'), position=100.0, marketPrice=1050.5999756, marketValue=105060.0, averageCost=1030.068777, unrealizedPNL=2053.12, realizedPNL=0.0, account='DUQ784050')
+2026-07-02 08:10:30,863 | INFO     | ib_insync.wrapper | updatePortfolio: PortfolioItem(contract=Stock(conId=29612196, symbol='SU', right='0', primaryExchange='SBF', currency='EUR', localSymbol='SU', tradingClass='SU'), position=100.0, marketPrice=276.1499939, marketValue=27615.0, averageCost=279.689775, unrealizedPNL=-353.98, realizedPNL=0.0, account='DUQ784050')
+2026-07-02 08:10:30,952 | INFO     | ib_insync.ib | Synchronization complete
+2026-07-02 08:10:31,454 | INFO     | IBKRLive | Positions IBKR : {'ENI.MI': 100, 'RHM.DE': 100, 'INGA.AS': 100, 'SU.PA': 100, 'PRX.AS': 100, 'JPM': 30, 'ADYEN.AS': -100, 'MC.PA': 10}
+2026-07-02 08:10:31,454 | INFO     | IBKRLive | ✓ IBKR connecté — 127.0.0.1:7497 Account=['DUQ784050']
+2026-07-02 08:10:31,756 | INFO     | run_dashboard | ✓ IBKR paper trading connecté | NAV compte : €1,000,228
+2026-07-02 08:10:32,209 | INFO     | IBKRLive | Positions IBKR : {'ENI.MI': 100, 'RHM.DE': 100, 'INGA.AS': 100, 'SU.PA': 100, 'PRX.AS': 100, 'JPM': 30, 'ADYEN.AS': -100, 'MC.PA': 10}
+2026-07-02 08:10:32,511 | INFO     | run_dashboard |   Positions IBKR : {'ENI.MI': 100, 'RHM.DE': 100, 'INGA.AS': 100, 'SU.PA': 100, 'PRX.AS': 100, 'JPM': 30, 'ADYEN.AS': -100, 'MC.PA': 10}
+2026-07-02 08:10:32,516 | INFO     | DashboardDataProvider | DataProvider init | 50 tickers | mode=live | Paper NAV: €1,000,000
+2026-07-02 08:10:32,716 | INFO     | DashApp | ✓ clock_callbacks
+2026-07-02 08:10:32,716 | INFO     | DashApp | ✓ math_callbacks
+2026-07-02 08:10:32,716 | INFO     | DashApp | ✓ company_callbacks
+2026-07-02 08:10:32,717 | INFO     | AIRouter | AI Provider détecté : none
+2026-07-02 08:10:32,717 | WARNING  | AIRouter | Aucun provider IA configuré.
+  → Groq (gratuit) : ajoutez GROQ_API_KEY=gsk_... dans .env
+  → Grok (xAI)     : ajoutez GROK_API_KEY=xai-... dans .env
+  → Ollama (local) : USE_OLLAMA=true dans .env
+2026-07-02 08:10:32,717 | INFO     | DashApp | ✓ ai_callbacks
+2026-07-02 08:10:32,717 | INFO     | DashApp | ✓ backtest_callbacks
+2026-07-02 08:10:32,718 | INFO     | DashApp | ✓ execution_callbacks
+2026-07-02 08:10:32,719 | INFO     | DashApp | ✓ idea_callbacks
+2026-07-02 08:10:32,719 | INFO     | DashApp | ✓ stop_loss_monitor (-6%)
+2026-07-02 08:10:32,719 | INFO     | DashApp | ✓ watchlist_callbacks
+2026-07-02 08:10:32,720 | INFO     | OptionsCallbacks | OptionsLab : connexion IBKR partagée détectée (IV de marché activée)
+2026-07-02 08:10:32,720 | INFO     | DashApp | ✓ options_callbacks
+2026-07-02 08:10:32,720 | INFO     | run_dashboard | Dashboard → http://127.0.0.1:8050  [IBKR PAPER port 7497]
+2026-07-02 08:10:32,720 | INFO     | dash.dash | Dash is running on http://127.0.0.1:8050/
+
+2026-07-02 08:10:32,732 | INFO     | werkzeug | [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on http://127.0.0.1:8050
+2026-07-02 08:10:32,732 | INFO     | werkzeug | [33mPress CTRL+C to quit[0m
+2026-07-02 08:10:38,207 | INFO     | werkzeug | 127.0.0.1 - - [02/Jul/2026 08:10:38] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-07-02 08:10:40,155 | INFO     | werkzeug | 127.0.0.1 - - [02/Jul/2026 08:10:40] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-07-02 08:10:42,130 | INFO     | werkzeug | 127.0.0.1 - - [02/Jul/2026 08:10:42] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-07-02 08:10:42,658 | INFO     | werkzeug | 127.0.0.1 - - [02/Jul/2026 08:10:42] "GET / HTTP/1.1" 200 -
+2026-07-02 08:10:42,671 | INFO     | werkzeug | 127.0.0.1 - - [02/Jul/2026 08:10:42] "[36mGET /_dash-component-suites/dash/dcc/async-graph.js HTTP/1.1[0m" 304 -
+2026-07-02 08:10:42,685 | INFO     | werkzeug | 127.0.0.1 - - [02/Jul/2026 08:10:42] "[36mGET /_dash-component-suites/plotly/package_data/plotly.min.js HTTP/1.1[0m" 304 -
+2026-07-02 08:10:42,881 | INFO     | werkzeug | 127.0.0.1 - - [02/Jul/2026 08:10:42] "GET /_dash-layout HTTP/1.1" 200 -
+2026-07-02 08:10:42,885 | INFO     | werkzeug | 127.0.0.1 - - [02/Jul/2026 08:10:42] "GET /_dash-dependencies HTTP/1.1" 200 -
+2026-07-02 08:10:42,998 | INFO     | werkzeug | 127.0.0.1 - - [02/Jul/2026 08:10:42] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-07-02 08:10:43,000 | INFO     | werkzeug | 127.0.0.1 - - [02/Jul/2026 08:10:43] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-07-02 08:10:46,176 | INFO     | werkzeug | 127.0.0.1 - - [02/Jul/2026 08:10:46] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-07-02 08:10:46,178 | INFO     | werkzeug | 127.0.0.1 - - [02/Jul/2026 08:10:46] "[35m[1mPOST /_dash-update-component HTTP/1.1[0m" 204 -
+2026-07-02 08:10:46,179 | INFO     | werkzeug | 127.0.0.1 - - [02/Jul/2026 08:10:46] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-07-02 08:10:46,181 | INFO     | werkzeug | 127.0.0.1 - - [02/Jul/2026 08:10:46] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-07-02 08:10:46,182 | INFO     | werkzeug | 127.0.0.1 - - [02/Jul/2026 08:10:46] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-07-02 08:10:48,045 | INFO     | werkzeug | 127.0.0.1 - - [02/Jul/2026 08:10:48] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-07-02 08:10:48,138 | INFO     | werkzeug | 127.0.0.1 - - [02/Jul/2026 08:10:48] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-07-02 08:10:50,145 | INFO     | werkzeug | 127.0.0.1 - - [02/Jul/2026 08:10:50] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-07-02 08:10:50,148 | INFO     | werkzeug | 127.0.0.1 - - [02/Jul/2026 08:10:50] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-07-02 08:10:52,145 | INFO     | werkzeug | 127.0.0.1 - - [02/Jul/2026 08:10:52] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-07-02 08:10:52,247 | INFO     | werkzeug | 127.0.0.1 - - [02/Jul/2026 08:10:52] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-07-02 08:10:53,412 | INFO     | werkzeug | 127.0.0.1 - - [02/Jul/2026 08:10:53] "[35m[1mPOST /_dash-update-component HTTP/1.1[0m" 204 -
+2026-07-02 08:10:54,253 | INFO     | werkzeug | 127.0.0.1 - - [02/Jul/2026 08:10:54] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-07-02 08:10:55,759 | INFO     | werkzeug | 127.0.0.1 - - [02/Jul/2026 08:10:55] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-07-02 08:10:56,242 | INFO     | werkzeug | 127.0.0.1 - - [02/Jul/2026 08:10:56] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-07-02 08:10:58,252 | INFO     | werkzeug | 127.0.0.1 - - [02/Jul/2026 08:10:58] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-07-02 08:10:58,581 | INFO     | werkzeug | 127.0.0.1 - - [02/Jul/2026 08:10:58] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-07-02 08:11:00,249 | INFO     | werkzeug | 127.0.0.1 - - [02/Jul/2026 08:11:00] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-07-02 08:11:02,047 | INFO     | werkzeug | 127.0.0.1 - - [02/Jul/2026 08:11:02] "GET /research HTTP/1.1" 200 -
+2026-07-02 08:11:02,051 | INFO     | werkzeug | 127.0.0.1 - - [02/Jul/2026 08:11:02] "[36mGET /_dash-component-suites/dash/dash_table/async-highlight.js HTTP/1.1[0m" 304 -
+2026-07-02 08:11:02,056 | INFO     | werkzeug | 127.0.0.1 - - [02/Jul/2026 08:11:02] "[36mGET /_dash-component-suites/dash/dash_table/async-table.js HTTP/1.1[0m" 304 -
+2026-07-02 08:11:02,105 | INFO     | werkzeug | 127.0.0.1 - - [02/Jul/2026 08:11:02] "GET /_dash-layout HTTP/1.1" 200 -
+2026-07-02 08:11:02,107 | INFO     | werkzeug | 127.0.0.1 - - [02/Jul/2026 08:11:02] "GET /_dash-dependencies HTTP/1.1" 200 -
+2026-07-02 08:11:02,129 | INFO     | werkzeug | 127.0.0.1 - - [02/Jul/2026 08:11:02] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-07-02 08:11:02,131 | INFO     | werkzeug | 127.0.0.1 - - [02/Jul/2026 08:11:02] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-07-02 08:11:21,103 | INFO     | werkzeug | 127.0.0.1 - - [02/Jul/2026 08:11:21] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-07-02 08:11:21,104 | INFO     | werkzeug | 127.0.0.1 - - [02/Jul/2026 08:11:21] "[35m[1mPOST /_dash-update-component HTTP/1.1[0m" 204 -
+2026-07-02 08:11:21,104 | INFO     | werkzeug | 127.0.0.1 - - [02/Jul/2026 08:11:21] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-07-02 08:11:21,104 | INFO     | werkzeug | 127.0.0.1 - - [02/Jul/2026 08:11:21] "GET /ideas HTTP/1.1" 200 -
+2026-07-02 08:11:21,105 | INFO     | werkzeug | 127.0.0.1 - - [02/Jul/2026 08:11:21] "GET /math HTTP/1.1" 200 -
+2026-07-02 08:11:21,105 | INFO     | werkzeug | 127.0.0.1 - - [02/Jul/2026 08:11:21] "GET /portfolio HTTP/1.1" 200 -
+2026-07-02 08:11:41,877 | INFO     | werkzeug | 127.0.0.1 - - [02/Jul/2026 08:11:41] "GET /watchlist HTTP/1.1" 200 -
+2026-07-02 08:11:42,801 | INFO     | werkzeug | 127.0.0.1 - - [02/Jul/2026 08:11:42] "GET /_dash-layout HTTP/1.1" 200 -
+2026-07-02 08:11:42,804 | INFO     | werkzeug | 127.0.0.1 - - [02/Jul/2026 08:11:42] "GET /_dash-dependencies HTTP/1.1" 200 -
+2026-07-02 08:11:42,825 | INFO     | werkzeug | 127.0.0.1 - - [02/Jul/2026 08:11:42] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-07-02 08:11:42,826 | INFO     | werkzeug | 127.0.0.1 - - [02/Jul/2026 08:11:42] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-07-02 08:11:42,837 | INFO     | werkzeug | 127.0.0.1 - - [02/Jul/2026 08:11:42] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-07-02 08:11:42,841 | INFO     | werkzeug | 127.0.0.1 - - [02/Jul/2026 08:11:42] "[35m[1mPOST /_dash-update-component HTTP/1.1[0m" 204 -
+2026-07-02 08:11:43,703 | INFO     | werkzeug | 127.0.0.1 - - [02/Jul/2026 08:11:43] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-07-02 08:11:43,735 | INFO     | werkzeug | 127.0.0.1 - - [02/Jul/2026 08:11:43] "[36mGET /_dash-component-suites/dash/dcc/async-graph.js HTTP/1.1[0m" 304 -
+2026-07-02 08:11:43,737 | INFO     | werkzeug | 127.0.0.1 - - [02/Jul/2026 08:11:43] "[36mGET /_dash-component-suites/dash/dcc/async-dropdown.js HTTP/1.1[0m" 304 -
+2026-07-02 08:11:43,747 | INFO     | werkzeug | 127.0.0.1 - - [02/Jul/2026 08:11:43] "[36mGET /_dash-component-suites/plotly/package_data/plotly.min.js HTTP/1.1[0m" 304 -
+2026-07-02 08:11:44,959 | INFO     | werkzeug | 127.0.0.1 - - [02/Jul/2026 08:11:44] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-07-02 08:11:47,153 | INFO     | werkzeug | 127.0.0.1 - - [02/Jul/2026 08:11:47] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-07-02 08:11:49,124 | INFO     | werkzeug | 127.0.0.1 - - [02/Jul/2026 08:11:49] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-07-02 08:11:51,035 | INFO     | werkzeug | 127.0.0.1 - - [02/Jul/2026 08:11:51] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-07-02 08:11:52,721 | INFO     | werkzeug | 127.0.0.1 - - [02/Jul/2026 08:11:52] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-07-02 08:11:53,025 | INFO     | werkzeug | 127.0.0.1 - - [02/Jul/2026 08:11:53] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-07-02 08:11:55,033 | INFO     | werkzeug | 127.0.0.1 - - [02/Jul/2026 08:11:55] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-07-02 08:11:57,032 | INFO     | werkzeug | 127.0.0.1 - - [02/Jul/2026 08:11:57] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-07-02 08:11:59,035 | INFO     | werkzeug | 127.0.0.1 - - [02/Jul/2026 08:11:59] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-07-02 08:12:01,044 | INFO     | werkzeug | 127.0.0.1 - - [02/Jul/2026 08:12:01] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-07-02 08:12:03,048 | INFO     | werkzeug | 127.0.0.1 - - [02/Jul/2026 08:12:03] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-07-02 08:12:05,058 | INFO     | werkzeug | 127.0.0.1 - - [02/Jul/2026 08:12:05] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-07-02 08:12:07,059 | INFO     | werkzeug | 127.0.0.1 - - [02/Jul/2026 08:12:07] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-07-02 08:12:09,061 | INFO     | werkzeug | 127.0.0.1 - - [02/Jul/2026 08:12:09] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-07-02 08:12:11,068 | INFO     | werkzeug | 127.0.0.1 - - [02/Jul/2026 08:12:11] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-07-02 08:12:13,070 | INFO     | werkzeug | 127.0.0.1 - - [02/Jul/2026 08:12:13] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-07-02 08:12:15,071 | INFO     | werkzeug | 127.0.0.1 - - [02/Jul/2026 08:12:15] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-07-02 08:12:17,074 | INFO     | werkzeug | 127.0.0.1 - - [02/Jul/2026 08:12:17] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-07-02 08:12:19,079 | INFO     | werkzeug | 127.0.0.1 - - [02/Jul/2026 08:12:19] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-07-02 08:12:21,085 | INFO     | werkzeug | 127.0.0.1 - - [02/Jul/2026 08:12:21] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-07-02 08:12:23,089 | INFO     | werkzeug | 127.0.0.1 - - [02/Jul/2026 08:12:23] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-07-02 08:12:25,089 | INFO     | werkzeug | 127.0.0.1 - - [02/Jul/2026 08:12:25] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-07-02 08:12:27,094 | INFO     | werkzeug | 127.0.0.1 - - [02/Jul/2026 08:12:27] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-07-02 08:12:29,105 | INFO     | werkzeug | 127.0.0.1 - - [02/Jul/2026 08:12:29] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-07-02 08:12:31,105 | INFO     | werkzeug | 127.0.0.1 - - [02/Jul/2026 08:12:31] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-07-02 08:12:33,109 | INFO     | werkzeug | 127.0.0.1 - - [02/Jul/2026 08:12:33] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-07-02 08:12:33,400 | INFO     | werkzeug | 127.0.0.1 - - [02/Jul/2026 08:12:33] "GET /options HTTP/1.1" 200 -
+2026-07-02 08:12:33,530 | INFO     | werkzeug | 127.0.0.1 - - [02/Jul/2026 08:12:33] "GET /_dash-layout HTTP/1.1" 200 -
+2026-07-02 08:12:33,533 | INFO     | werkzeug | 127.0.0.1 - - [02/Jul/2026 08:12:33] "GET /_dash-dependencies HTTP/1.1" 200 -
+2026-07-02 08:12:33,573 | INFO     | werkzeug | 127.0.0.1 - - [02/Jul/2026 08:12:33] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-07-02 08:12:33,575 | INFO     | werkzeug | 127.0.0.1 - - [02/Jul/2026 08:12:33] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-07-02 08:12:33,588 | INFO     | werkzeug | 127.0.0.1 - - [02/Jul/2026 08:12:33] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-07-02 08:12:33,591 | INFO     | werkzeug | 127.0.0.1 - - [02/Jul/2026 08:12:33] "[35m[1mPOST /_dash-update-component HTTP/1.1[0m" 204 -
+2026-07-02 08:12:33,603 | INFO     | werkzeug | 127.0.0.1 - - [02/Jul/2026 08:12:33] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-07-02 08:12:33,623 | INFO     | werkzeug | 127.0.0.1 - - [02/Jul/2026 08:12:33] "[36mGET /_dash-component-suites/dash/dcc/async-dropdown.js HTTP/1.1[0m" 304 -
+2026-07-02 08:12:33,626 | INFO     | werkzeug | 127.0.0.1 - - [02/Jul/2026 08:12:33] "[36mGET /_dash-component-suites/dash/dcc/async-graph.js HTTP/1.1[0m" 304 -
+2026-07-02 08:12:33,882 | INFO     | OptionsMockProvider | MockProvider[ASML.AS] : 252 contrats @ spot 1641.60 (vol ATM 34%, secteur Information Technology)
+2026-07-02 08:12:33,895 | INFO     | werkzeug | 127.0.0.1 - - [02/Jul/2026 08:12:33] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-07-02 08:12:33,903 | INFO     | werkzeug | 127.0.0.1 - - [02/Jul/2026 08:12:33] "[36mGET /_dash-component-suites/plotly/package_data/plotly.min.js HTTP/1.1[0m" 304 -
+2026-07-02 08:12:35,559 | INFO     | werkzeug | 127.0.0.1 - - [02/Jul/2026 08:12:35] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-07-02 08:12:37,559 | INFO     | werkzeug | 127.0.0.1 - - [02/Jul/2026 08:12:37] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-07-02 08:12:39,557 | INFO     | werkzeug | 127.0.0.1 - - [02/Jul/2026 08:12:39] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-07-02 08:12:41,583 | INFO     | werkzeug | 127.0.0.1 - - [02/Jul/2026 08:12:41] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-07-02 08:12:43,549 | INFO     | werkzeug | 127.0.0.1 - - [02/Jul/2026 08:12:43] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-07-02 08:12:45,560 | INFO     | werkzeug | 127.0.0.1 - - [02/Jul/2026 08:12:45] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-07-02 08:12:47,597 | INFO     | werkzeug | 127.0.0.1 - - [02/Jul/2026 08:12:47] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-07-02 08:12:48,383 | INFO     | werkzeug | 127.0.0.1 - - [02/Jul/2026 08:12:48] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-07-02 08:12:49,574 | INFO     | werkzeug | 127.0.0.1 - - [02/Jul/2026 08:12:49] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-07-02 08:12:51,576 | INFO     | werkzeug | 127.0.0.1 - - [02/Jul/2026 08:12:51] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-07-02 08:12:53,583 | INFO     | werkzeug | 127.0.0.1 - - [02/Jul/2026 08:12:53] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-07-02 08:12:55,587 | INFO     | werkzeug | 127.0.0.1 - - [02/Jul/2026 08:12:55] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-07-02 08:12:57,591 | INFO     | werkzeug | 127.0.0.1 - - [02/Jul/2026 08:12:57] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-07-02 08:12:59,590 | INFO     | werkzeug | 127.0.0.1 - - [02/Jul/2026 08:12:59] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-07-02 08:13:01,593 | INFO     | werkzeug | 127.0.0.1 - - [02/Jul/2026 08:13:01] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-07-02 08:13:03,427 | INFO     | werkzeug | 127.0.0.1 - - [02/Jul/2026 08:13:03] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-07-02 08:13:03,444 | INFO     | werkzeug | 127.0.0.1 - - [02/Jul/2026 08:13:03] "[36mGET /_dash-component-suites/dash/dcc/async-slider.js HTTP/1.1[0m" 304 -
+2026-07-02 08:13:03,459 | INFO     | werkzeug | 127.0.0.1 - - [02/Jul/2026 08:13:03] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-07-02 08:13:03,461 | INFO     | werkzeug | 127.0.0.1 - - [02/Jul/2026 08:13:03] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-07-02 08:13:03,516 | INFO     | werkzeug | 127.0.0.1 - - [02/Jul/2026 08:13:03] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-07-02 08:13:03,594 | INFO     | werkzeug | 127.0.0.1 - - [02/Jul/2026 08:13:03] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-07-02 08:13:05,516 | INFO     | werkzeug | 127.0.0.1 - - [02/Jul/2026 08:13:05] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-07-02 08:13:05,547 | INFO     | werkzeug | 127.0.0.1 - - [02/Jul/2026 08:13:05] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-07-02 08:13:05,549 | INFO     | werkzeug | 127.0.0.1 - - [02/Jul/2026 08:13:05] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-07-02 08:13:05,598 | INFO     | werkzeug | 127.0.0.1 - - [02/Jul/2026 08:13:05] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-07-02 08:13:06,277 | INFO     | werkzeug | 127.0.0.1 - - [02/Jul/2026 08:13:06] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-07-02 08:13:06,302 | INFO     | werkzeug | 127.0.0.1 - - [02/Jul/2026 08:13:06] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-07-02 08:13:07,607 | INFO     | werkzeug | 127.0.0.1 - - [02/Jul/2026 08:13:07] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-07-02 08:13:08,614 | INFO     | werkzeug | 127.0.0.1 - - [02/Jul/2026 08:13:08] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-07-02 08:13:08,639 | INFO     | werkzeug | 127.0.0.1 - - [02/Jul/2026 08:13:08] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-07-02 08:13:08,641 | INFO     | werkzeug | 127.0.0.1 - - [02/Jul/2026 08:13:08] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-07-02 08:13:09,611 | INFO     | werkzeug | 127.0.0.1 - - [02/Jul/2026 08:13:09] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-07-02 08:13:11,617 | INFO     | werkzeug | 127.0.0.1 - - [02/Jul/2026 08:13:11] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-07-02 08:13:13,620 | INFO     | werkzeug | 127.0.0.1 - - [02/Jul/2026 08:13:13] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-07-02 08:13:13,692 | INFO     | werkzeug | 127.0.0.1 - - [02/Jul/2026 08:13:13] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-07-02 08:13:15,616 | INFO     | werkzeug | 127.0.0.1 - - [02/Jul/2026 08:13:15] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-07-02 08:13:15,650 | INFO     | werkzeug | 127.0.0.1 - - [02/Jul/2026 08:13:15] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-07-02 08:13:17,628 | INFO     | werkzeug | 127.0.0.1 - - [02/Jul/2026 08:13:17] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-07-02 08:13:19,632 | INFO     | werkzeug | 127.0.0.1 - - [02/Jul/2026 08:13:19] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-07-02 08:13:21,641 | INFO     | werkzeug | 127.0.0.1 - - [02/Jul/2026 08:13:21] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-07-02 08:13:23,643 | INFO     | werkzeug | 127.0.0.1 - - [02/Jul/2026 08:13:23] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-07-02 08:13:25,651 | INFO     | werkzeug | 127.0.0.1 - - [02/Jul/2026 08:13:25] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-07-02 08:13:27,205 | INFO     | OptionsMockProvider | MockProvider[DG.PA] : 252 contrats @ spot 124.30 (vol ATM 27%, secteur Industrials)
+2026-07-02 08:13:27,223 | INFO     | werkzeug | 127.0.0.1 - - [02/Jul/2026 08:13:27] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-07-02 08:13:27,645 | INFO     | werkzeug | 127.0.0.1 - - [02/Jul/2026 08:13:27] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-07-02 08:13:29,650 | INFO     | werkzeug | 127.0.0.1 - - [02/Jul/2026 08:13:29] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-07-02 08:13:31,660 | INFO     | werkzeug | 127.0.0.1 - - [02/Jul/2026 08:13:31] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-07-02 08:13:33,557 | INFO     | werkzeug | 127.0.0.1 - - [02/Jul/2026 08:13:33] "[35m[1mPOST /_dash-update-component HTTP/1.1[0m" 204 -
+2026-07-02 08:13:33,657 | INFO     | werkzeug | 127.0.0.1 - - [02/Jul/2026 08:13:33] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-07-02 08:13:35,664 | INFO     | werkzeug | 127.0.0.1 - - [02/Jul/2026 08:13:35] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-07-02 08:13:36,162 | INFO     | werkzeug | 127.0.0.1 - - [02/Jul/2026 08:13:36] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-07-02 08:13:37,324 | INFO     | werkzeug | 127.0.0.1 - - [02/Jul/2026 08:13:37] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-07-02 08:13:37,667 | INFO     | werkzeug | 127.0.0.1 - - [02/Jul/2026 08:13:37] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-07-02 08:13:39,668 | INFO     | werkzeug | 127.0.0.1 - - [02/Jul/2026 08:13:39] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-07-02 08:13:41,676 | INFO     | werkzeug | 127.0.0.1 - - [02/Jul/2026 08:13:41] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-07-02 08:13:43,677 | INFO     | werkzeug | 127.0.0.1 - - [02/Jul/2026 08:13:43] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-07-02 08:13:45,690 | INFO     | werkzeug | 127.0.0.1 - - [02/Jul/2026 08:13:45] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-07-02 08:13:47,797 | INFO     | werkzeug | 127.0.0.1 - - [02/Jul/2026 08:13:47] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-07-02 08:13:51,820 | INFO     | werkzeug | 127.0.0.1 - - [02/Jul/2026 08:13:51] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-07-02 08:13:57,249 | INFO     | werkzeug | 127.0.0.1 - - [02/Jul/2026 08:13:57] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-07-02 08:13:59,712 | INFO     | werkzeug | 127.0.0.1 - - [02/Jul/2026 08:13:59] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-07-02 08:14:08,023 | INFO     | werkzeug | 127.0.0.1 - - [02/Jul/2026 08:14:08] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-07-02 08:14:21,715 | INFO     | werkzeug | 127.0.0.1 - - [02/Jul/2026 08:14:21] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-07-02 08:14:29,924 | INFO     | werkzeug | 127.0.0.1 - - [02/Jul/2026 08:14:29] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-07-02 08:14:33,300 | INFO     | werkzeug | 127.0.0.1 - - [02/Jul/2026 08:14:33] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-07-02 08:14:33,554 | INFO     | werkzeug | 127.0.0.1 - - [02/Jul/2026 08:14:33] "[35m[1mPOST /_dash-update-component HTTP/1.1[0m" 204 -
+2026-07-02 08:14:35,211 | INFO     | werkzeug | 127.0.0.1 - - [02/Jul/2026 08:14:35] "GET /portfolio HTTP/1.1" 200 -
+2026-07-02 08:14:35,233 | INFO     | werkzeug | 127.0.0.1 - - [02/Jul/2026 08:14:35] "[36mGET /_dash-component-suites/dash/dash_table/async-highlight.js HTTP/1.1[0m" 304 -
+2026-07-02 08:14:35,237 | INFO     | werkzeug | 127.0.0.1 - - [02/Jul/2026 08:14:35] "[36mGET /_dash-component-suites/dash/dash_table/async-table.js HTTP/1.1[0m" 304 -
+2026-07-02 08:14:35,754 | INFO     | werkzeug | 127.0.0.1 - - [02/Jul/2026 08:14:35] "GET /_dash-layout HTTP/1.1" 200 -
+2026-07-02 08:14:35,757 | INFO     | werkzeug | 127.0.0.1 - - [02/Jul/2026 08:14:35] "GET /_dash-dependencies HTTP/1.1" 200 -
+2026-07-02 08:14:35,810 | INFO     | werkzeug | 127.0.0.1 - - [02/Jul/2026 08:14:35] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-07-02 08:14:35,813 | INFO     | werkzeug | 127.0.0.1 - - [02/Jul/2026 08:14:35] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-07-02 08:14:35,838 | INFO     | ib_insync.wrapper | updatePortfolio: PortfolioItem(contract=Stock(conId=15085, symbol='RHM', right='0', primaryExchange='IBIS', currency='EUR', localSymbol='RHM', tradingClass='XETRA'), position=100.0, marketPrice=1050.5999756, marketValue=105060.0, averageCost=1030.068777, unrealizedPNL=2053.12, realizedPNL=0.0, account='DUQ784050')
+2026-07-02 08:14:35,839 | INFO     | ib_insync.wrapper | Warning 2108, reqId -1: Market data farm connection is inactive but should be available upon demand.usopt.nj
+2026-07-02 08:14:35,839 | INFO     | ib_insync.wrapper | Warning 2108, reqId -1: Market data farm connection is inactive but should be available upon demand.usopt.nj
+2026-07-02 08:14:36,529 | INFO     | werkzeug | 127.0.0.1 - - [02/Jul/2026 08:14:36] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-07-02 08:14:36,533 | INFO     | werkzeug | 127.0.0.1 - - [02/Jul/2026 08:14:36] "[35m[1mPOST /_dash-update-component HTTP/1.1[0m" 204 -
+2026-07-02 08:14:36,546 | INFO     | werkzeug | 127.0.0.1 - - [02/Jul/2026 08:14:36] "[36mGET /_dash-component-suites/dash/dcc/async-graph.js HTTP/1.1[0m" 304 -
+2026-07-02 08:14:36,562 | INFO     | werkzeug | 127.0.0.1 - - [02/Jul/2026 08:14:36] "[36mGET /_dash-component-suites/plotly/package_data/plotly.min.js HTTP/1.1[0m" 304 -
+2026-07-02 08:14:37,830 | INFO     | werkzeug | 127.0.0.1 - - [02/Jul/2026 08:14:37] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-07-02 08:14:39,819 | INFO     | werkzeug | 127.0.0.1 - - [02/Jul/2026 08:14:39] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-07-02 08:14:42,930 | INFO     | werkzeug | 127.0.0.1 - - [02/Jul/2026 08:14:42] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-07-02 08:14:45,027 | INFO     | werkzeug | 127.0.0.1 - - [02/Jul/2026 08:14:45] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-07-02 08:14:47,089 | INFO     | werkzeug | 127.0.0.1 - - [02/Jul/2026 08:14:47] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-07-02 08:14:49,370 | INFO     | werkzeug | 127.0.0.1 - - [02/Jul/2026 08:14:49] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-07-02 08:14:49,929 | INFO     | ib_insync.ib | Disconnecting from 127.0.0.1:7497, 119 B sent in 8 messages, 21.0 kB received in 404 messages, session time 259 s.
+2026-07-02 08:14:49,929 | INFO     | ib_insync.client | Disconnecting
+2026-07-02 08:37:17,700 | INFO     | run_dashboard | Mode     : backtest
+2026-07-02 08:37:17,700 | INFO     | run_dashboard | Univers  : full → 50 tickers
+2026-07-02 08:37:17,700 | INFO     | run_dashboard | Période  : 2022-01-01 → 2026-01-01
+2026-07-02 08:37:17,700 | INFO     | run_dashboard | Stop-loss: -6% par position (automatique)
+2026-07-02 08:37:18,795 | INFO     | run_dashboard | ▶ Walk-forward de démarrage...
+2026-07-02 08:37:18,824 | INFO     | BacktestEngine | Démarrage backtest | 2022-01-04 → 2025-12-31 | 50 tickers
+2026-07-02 08:37:18,826 | INFO     | BacktestEngine | Walk-forward : 12 fenêtres générées
+2026-07-02 08:37:18,826 | INFO     | BacktestEngine |   Fenêtre train [2022-01-04 → 2023-01-04] | test [2023-01-04 → 2023-04-04]
+2026-07-02 08:37:18,827 | INFO     | BacktestEngine |   Fenêtre train [2022-04-04 → 2023-04-04] | test [2023-04-04 → 2023-07-04]
+2026-07-02 08:37:18,827 | INFO     | BacktestEngine |   Fenêtre train [2022-07-04 → 2023-07-04] | test [2023-07-04 → 2023-10-04]
+2026-07-02 08:37:18,828 | INFO     | BacktestEngine |   Fenêtre train [2022-10-04 → 2023-10-04] | test [2023-10-04 → 2024-01-04]
+2026-07-02 08:37:18,828 | INFO     | BacktestEngine |   Fenêtre train [2023-01-04 → 2024-01-04] | test [2024-01-04 → 2024-04-04]
+2026-07-02 08:37:18,829 | INFO     | BacktestEngine |   Fenêtre train [2023-04-04 → 2024-04-04] | test [2024-04-04 → 2024-07-04]
+2026-07-02 08:37:18,829 | INFO     | BacktestEngine |   Fenêtre train [2023-07-04 → 2024-07-04] | test [2024-07-04 → 2024-10-04]
+2026-07-02 08:37:18,830 | INFO     | BacktestEngine |   Fenêtre train [2023-10-04 → 2024-10-04] | test [2024-10-04 → 2025-01-04]
+2026-07-02 08:37:18,830 | INFO     | BacktestEngine |   Fenêtre train [2024-01-04 → 2025-01-04] | test [2025-01-04 → 2025-04-04]
+2026-07-02 08:37:18,831 | INFO     | BacktestEngine |   Fenêtre train [2024-04-04 → 2025-04-04] | test [2025-04-04 → 2025-07-04]
+2026-07-02 08:37:18,831 | INFO     | BacktestEngine |   Fenêtre train [2024-07-04 → 2025-07-04] | test [2025-07-04 → 2025-10-04]
+2026-07-02 08:37:18,832 | INFO     | BacktestEngine |   Fenêtre train [2024-10-04 → 2025-10-04] | test [2025-10-04 → 2025-12-31]
+2026-07-02 08:37:18,837 | INFO     | BacktestEngine | Backtest terminé | Sharpe=1.06 | MaxDD=-9.60% | Return=14.12%
+2026-07-02 08:37:18,837 | INFO     | run_dashboard |   Backtest OK — Sharpe 1.06
+2026-07-02 08:37:18,842 | INFO     | DashboardDataProvider | DataProvider init | 50 tickers | mode=backtest | Paper NAV: €1,000,000
+2026-07-02 08:37:19,031 | INFO     | DashApp | ✓ clock_callbacks
+2026-07-02 08:37:19,031 | INFO     | DashApp | ✓ math_callbacks
+2026-07-02 08:37:19,031 | INFO     | DashApp | ✓ company_callbacks
+2026-07-02 08:37:19,033 | INFO     | AIRouter | AI Provider détecté : none
+2026-07-02 08:37:19,033 | WARNING  | AIRouter | Aucun provider IA configuré.
+  → Groq (gratuit) : ajoutez GROQ_API_KEY=gsk_... dans .env
+  → Grok (xAI)     : ajoutez GROK_API_KEY=xai-... dans .env
+  → Ollama (local) : USE_OLLAMA=true dans .env
+2026-07-02 08:37:19,033 | INFO     | DashApp | ✓ ai_callbacks
+2026-07-02 08:37:19,034 | INFO     | DashApp | ✓ backtest_callbacks
+2026-07-02 08:37:19,035 | INFO     | DashApp | ✓ execution_callbacks
+2026-07-02 08:37:19,035 | INFO     | DashApp | ✓ idea_callbacks
+2026-07-02 08:37:19,035 | INFO     | DashApp | ✓ stop_loss_monitor (-6%)
+2026-07-02 08:37:19,036 | INFO     | DashApp | ✓ watchlist_callbacks
+2026-07-02 08:37:19,037 | INFO     | DashApp | ✓ options_callbacks
+2026-07-02 08:37:19,037 | INFO     | run_dashboard | Dashboard → http://127.0.0.1:8050  [Paper Python local]
+2026-07-02 08:37:19,037 | INFO     | dash.dash | Dash is running on http://127.0.0.1:8050/
+
+2026-07-02 08:37:19,059 | INFO     | werkzeug | [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on http://127.0.0.1:8050
+2026-07-02 08:37:19,060 | INFO     | werkzeug | [33mPress CTRL+C to quit[0m
+2026-07-02 08:37:30,988 | INFO     | werkzeug | 127.0.0.1 - - [02/Jul/2026 08:37:30] "GET / HTTP/1.1" 200 -
+2026-07-02 08:37:31,004 | INFO     | werkzeug | 127.0.0.1 - - [02/Jul/2026 08:37:31] "[36mGET /_dash-component-suites/dash/dcc/async-graph.js HTTP/1.1[0m" 304 -
+2026-07-02 08:37:31,011 | INFO     | werkzeug | 127.0.0.1 - - [02/Jul/2026 08:37:31] "[36mGET /_dash-component-suites/plotly/package_data/plotly.min.js HTTP/1.1[0m" 304 -
+2026-07-02 08:37:31,986 | INFO     | werkzeug | 127.0.0.1 - - [02/Jul/2026 08:37:31] "GET /_dash-layout HTTP/1.1" 200 -
+2026-07-02 08:37:31,987 | INFO     | werkzeug | 127.0.0.1 - - [02/Jul/2026 08:37:31] "GET /_dash-dependencies HTTP/1.1" 200 -
+2026-07-02 08:37:32,149 | INFO     | werkzeug | 127.0.0.1 - - [02/Jul/2026 08:37:32] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-07-02 08:37:32,151 | INFO     | werkzeug | 127.0.0.1 - - [02/Jul/2026 08:37:32] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-07-02 08:37:32,153 | INFO     | werkzeug | 127.0.0.1 - - [02/Jul/2026 08:37:32] "[35m[1mPOST /_dash-update-component HTTP/1.1[0m" 204 -
+2026-07-02 08:37:34,019 | INFO     | werkzeug | 127.0.0.1 - - [02/Jul/2026 08:37:34] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-07-02 08:37:35,697 | INFO     | werkzeug | 127.0.0.1 - - [02/Jul/2026 08:37:35] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-07-02 08:37:36,015 | INFO     | werkzeug | 127.0.0.1 - - [02/Jul/2026 08:37:36] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-07-02 08:37:38,026 | INFO     | werkzeug | 127.0.0.1 - - [02/Jul/2026 08:37:38] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-07-02 08:37:40,030 | INFO     | werkzeug | 127.0.0.1 - - [02/Jul/2026 08:37:40] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-07-02 08:37:42,031 | INFO     | werkzeug | 127.0.0.1 - - [02/Jul/2026 08:37:42] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-07-02 08:37:44,019 | INFO     | werkzeug | 127.0.0.1 - - [02/Jul/2026 08:37:44] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-07-02 08:37:46,029 | INFO     | werkzeug | 127.0.0.1 - - [02/Jul/2026 08:37:46] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-07-02 08:37:48,035 | INFO     | werkzeug | 127.0.0.1 - - [02/Jul/2026 08:37:48] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-07-02 08:37:50,040 | INFO     | werkzeug | 127.0.0.1 - - [02/Jul/2026 08:37:50] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-07-02 08:37:52,046 | INFO     | werkzeug | 127.0.0.1 - - [02/Jul/2026 08:37:52] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-07-02 08:37:54,049 | INFO     | werkzeug | 127.0.0.1 - - [02/Jul/2026 08:37:54] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-07-02 08:37:56,053 | INFO     | werkzeug | 127.0.0.1 - - [02/Jul/2026 08:37:56] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-07-02 08:37:58,055 | INFO     | werkzeug | 127.0.0.1 - - [02/Jul/2026 08:37:58] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-07-02 08:38:00,058 | INFO     | werkzeug | 127.0.0.1 - - [02/Jul/2026 08:38:00] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-07-02 08:38:02,071 | INFO     | werkzeug | 127.0.0.1 - - [02/Jul/2026 08:38:02] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-07-02 08:38:04,066 | INFO     | werkzeug | 127.0.0.1 - - [02/Jul/2026 08:38:04] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-07-02 08:38:04,326 | INFO     | werkzeug | 127.0.0.1 - - [02/Jul/2026 08:38:04] "GET /portfolio HTTP/1.1" 200 -
+2026-07-02 08:38:04,331 | INFO     | werkzeug | 127.0.0.1 - - [02/Jul/2026 08:38:04] "[36mGET /_dash-component-suites/dash/dash_table/async-highlight.js HTTP/1.1[0m" 304 -
+2026-07-02 08:38:04,331 | INFO     | werkzeug | 127.0.0.1 - - [02/Jul/2026 08:38:04] "[36mGET /_dash-component-suites/dash/dash_table/async-table.js HTTP/1.1[0m" 304 -
+2026-07-02 08:38:04,776 | INFO     | werkzeug | 127.0.0.1 - - [02/Jul/2026 08:38:04] "GET /_dash-layout HTTP/1.1" 200 -
+2026-07-02 08:38:04,777 | INFO     | werkzeug | 127.0.0.1 - - [02/Jul/2026 08:38:04] "GET /_dash-dependencies HTTP/1.1" 200 -
+2026-07-02 08:38:04,821 | INFO     | werkzeug | 127.0.0.1 - - [02/Jul/2026 08:38:04] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-07-02 08:38:04,822 | INFO     | werkzeug | 127.0.0.1 - - [02/Jul/2026 08:38:04] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-07-02 08:38:04,848 | INFO     | werkzeug | 127.0.0.1 - - [02/Jul/2026 08:38:04] "[35m[1mPOST /_dash-update-component HTTP/1.1[0m" 204 -
+2026-07-02 08:38:04,904 | INFO     | werkzeug | 127.0.0.1 - - [02/Jul/2026 08:38:04] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-07-02 08:38:04,911 | INFO     | werkzeug | 127.0.0.1 - - [02/Jul/2026 08:38:04] "[36mGET /_dash-component-suites/dash/dcc/async-graph.js HTTP/1.1[0m" 304 -
+2026-07-02 08:38:04,925 | INFO     | werkzeug | 127.0.0.1 - - [02/Jul/2026 08:38:04] "[36mGET /_dash-component-suites/plotly/package_data/plotly.min.js HTTP/1.1[0m" 304 -
+2026-07-02 08:38:06,809 | INFO     | werkzeug | 127.0.0.1 - - [02/Jul/2026 08:38:06] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-07-02 08:38:08,807 | INFO     | werkzeug | 127.0.0.1 - - [02/Jul/2026 08:38:08] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-07-02 08:38:10,807 | INFO     | werkzeug | 127.0.0.1 - - [02/Jul/2026 08:38:10] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-07-02 08:38:12,804 | INFO     | werkzeug | 127.0.0.1 - - [02/Jul/2026 08:38:12] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-07-02 08:38:14,799 | INFO     | werkzeug | 127.0.0.1 - - [02/Jul/2026 08:38:14] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-07-02 08:38:16,813 | INFO     | werkzeug | 127.0.0.1 - - [02/Jul/2026 08:38:16] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-07-02 08:38:18,820 | INFO     | werkzeug | 127.0.0.1 - - [02/Jul/2026 08:38:18] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-07-02 08:38:20,818 | INFO     | werkzeug | 127.0.0.1 - - [02/Jul/2026 08:38:20] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-07-02 08:38:22,824 | INFO     | werkzeug | 127.0.0.1 - - [02/Jul/2026 08:38:22] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-07-02 08:38:24,828 | INFO     | werkzeug | 127.0.0.1 - - [02/Jul/2026 08:38:24] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-07-02 08:38:27,315 | INFO     | werkzeug | 127.0.0.1 - - [02/Jul/2026 08:38:27] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-07-02 08:38:31,006 | INFO     | werkzeug | 127.0.0.1 - - [02/Jul/2026 08:38:31] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-07-02 08:38:34,642 | INFO     | werkzeug | 127.0.0.1 - - [02/Jul/2026 08:38:34] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-07-02 08:38:43,365 | INFO     | werkzeug | 127.0.0.1 - - [02/Jul/2026 08:38:43] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-07-02 08:38:43,413 | INFO     | werkzeug | 127.0.0.1 - - [02/Jul/2026 08:38:43] "POST /_dash-update-component HTTP/1.1" 200 -
+2026-07-02 08:38:47,098 | INFO     | werkzeug | 127.0.0.1 - - [02/Jul/2026 08:38:47] "POST /_dash-update-component HTTP/1.1" 200 -
