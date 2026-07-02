@@ -49,6 +49,7 @@ def register_router(app, dp):
             "/risk":      "dashboard.pages.risk_lab",
             "/backtest":  "dashboard.pages.backtest_lab",
             "/execution": "dashboard.pages.execution_lab",
+            "/rebalance": "dashboard.pages.rebalance_lab",
             "/company":   "dashboard.pages.company_analyzer",
             "/watchlist": "dashboard.pages.watchlist",
             "/options":   "dashboard.pages.options_lab",

@@ -131,6 +131,39 @@ def layout(dp=None):
                  style={"marginTop": "10px", "fontSize": "11px", "color": "#7090a8"}),
     ], style=_CARD)
 
+    # ── Rebalance : boucle stratégie → exécution ──────────────────
+    rebalance = html.Div([
+        html.Div([
+            html.Div("STRATÉGIE → EXÉCUTION", style={**_LABEL, "color": "#4ade80"}),
+            html.Div("Génère le portefeuille cible depuis les signaux momentum L/S "
+                     "(top 5 long / bottom 5 short, inverse-vol) et calcule les ordres "
+                     "pour l'atteindre.",
+                     style={"fontSize": "11px", "color": "#7090a8", "marginBottom": "12px"}),
+        ]),
+        html.Div([
+            html.Span("Capital cible : ", style={"fontSize": "11px", "color": "#94b8cc"}),
+            dcc.Input(id="rebal-capital", type="number", value=1_000_000, min=10_000,
+                      step=10_000, style={"width": "140px", "backgroundColor": "#0a0d12",
+                      "color": "#e8f2ff", "border": "1px solid #1e2a38",
+                      "borderRadius": "4px", "padding": "6px 10px", "fontSize": "12px"}),
+            html.Span(" €", style={"fontSize": "11px", "color": "#94b8cc", "marginRight": "16px"}),
+            _btn("⟳  Générer le portefeuille cible", "rebal-generate-btn", "#4ade80"),
+        ], style={"display": "flex", "alignItems": "center", "flexWrap": "wrap",
+                  "gap": "8px", "marginBottom": "14px"}),
+        html.Div(id="rebal-summary",
+                 style={"fontSize": "12px", "color": "#c8d8e8", "marginBottom": "12px"}),
+        html.Div(id="rebal-orders-table"),
+        html.Div(style={"height": "12px"}),
+        html.Div([
+            _btn("⬆  Exécuter tous les ordres", "rebal-execute-btn", "#f0a500"),
+            html.Span("  ⚠️ Envoie les ordres réels vers IBKR",
+                      style={"fontSize": "10px", "color": "#f0a500", "marginLeft": "10px"}),
+        ], id="rebal-execute-row", style={"display": "none"}),
+        html.Div(id="rebal-execute-status",
+                 style={"marginTop": "10px", "fontSize": "11px", "color": "#7090a8"}),
+        dcc.Store(id="rebal-orders-store"),
+    ], style=_CARD)
+
     return html.Div([
         html.Div("Execution Lab", style=_H1),
         mode_bar,
@@ -138,6 +171,7 @@ def layout(dp=None):
             dbc.Col(order_form, width=8),
             dbc.Col(positions,  width=4),
         ], className="g-3", style={"marginBottom": "0"}),
+        rebalance,
         dbc.Row([
             dbc.Col(blotter, width=7),
             dbc.Col(deltas,  width=5),

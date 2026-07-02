@@ -62,6 +62,13 @@ def build_dashboard(data_provider=None, exec_engine=None, stop_loss_pct=0.06):
         logger.warning(f"✗ execution_callbacks: {e}")
 
     try:
+        from dashboard.callbacks.rebalance_callbacks import register_rebalance_callbacks
+        register_rebalance_callbacks(app, exec_engine)
+        logger.info("✓ rebalance_callbacks")
+    except Exception as e:
+        logger.warning(f"✗ rebalance_callbacks: {e}")
+
+    try:
         from dashboard.callbacks.idea_callbacks import (
             register_idea_callbacks, register_stop_loss_callbacks
         )

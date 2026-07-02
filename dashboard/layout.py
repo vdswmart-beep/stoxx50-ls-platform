@@ -33,6 +33,7 @@ _NAV_ITEMS = [
     ("∫", "Options Lab",  "/options"),
     ("section", "EXECUTION", None),
     ("⇄", "Execution",    "/execution"),
+    ("⚖", "Rebalancing",  "/rebalance"),
     ("▣", "Company",      "/company"),
 ]
 

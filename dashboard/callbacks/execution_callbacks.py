@@ -396,3 +396,130 @@ def register_execution_callbacks(app, dp, exec_engine=None):
             return dcc.send_bytes(data, f"blotter_{datetime.now().strftime('%Y%m%d_%H%M')}.xlsx")
         except Exception as e:
             raise PreventUpdate
+
+
+    # ═══════════════ BOUCLE STRATÉGIE → EXÉCUTION ═══════════════
+
+    @app.callback(
+        Output("rebal-summary",       "children"),
+        Output("rebal-orders-table",  "children"),
+        Output("rebal-orders-store",  "data"),
+        Output("rebal-execute-row",   "style"),
+        Input("rebal-generate-btn",   "n_clicks"),
+        State("rebal-capital",        "value"),
+        prevent_initial_call=True,
+    )
+    def generate_target(n, capital):
+        if not n:
+            raise PreventUpdate
+        import json as _json
+        from execution.rebalancer import (
+            compute_target_portfolio, compute_orders, summarize)
+        capital = float(capital or 1_000_000)
+
+        # Rendements + prix actuels
+        try:
+            returns = dp.get_returns()
+        except Exception as e:
+            return html.Span(f"Erreur données : {e}", style={"color": "#f87171"}), None, None, {"display": "none"}
+        if returns is None or returns.empty:
+            return html.Span("Pas de données de rendements disponibles.",
+                             style={"color": "#f87171"}), None, None, {"display": "none"}
+
+        try:
+            prices = dp.get_current_prices()
+        except Exception:
+            prices = {}
+
+        # Portefeuille cible
+        targets = compute_target_portfolio(returns, prices, capital=capital, top_n=5)
+        if not targets:
+            return html.Span("Aucune position cible générée (prix manquants ?).",
+                             style={"color": "#f0a500"}), None, None, {"display": "none"}
+
+        # Positions actuelles (IBKR si live, sinon vide)
+        current = {}
+        try:
+            if is_ibkr and exec_engine.is_connected:
+                current = exec_engine.get_positions()
+        except Exception:
+            current = {}
+
+        orders = compute_orders(targets, current)
+        s = summarize(targets, orders)
+
+        # Résumé
+        summary = html.Div([
+            html.Span(f"Portefeuille cible : ", style={"color": "#94b8cc"}),
+            html.Span(f"{s['n_long']} longs / {s['n_short']} shorts", style={"color": "#e8f2ff", "fontWeight": "600"}),
+            html.Span(f"  ·  Gross : €{s['gross_exposure']:,.0f}", style={"color": "#94b8cc"}),
+            html.Span(f"  ·  {s['n_orders']} ordres à passer", style={"color": "#f0a500", "fontWeight": "600"}),
+        ])
+
+        # Table des ordres
+        if orders:
+            header = html.Tr([html.Th(h, style={"textAlign": "left", "padding": "4px 8px",
+                              "fontSize": "10px", "color": "#7090a8", "borderBottom": "1px solid #1e2a38"})
+                              for h in ["Action", "Qty", "Ticker", "Raison", "Actuel→Cible"]])
+            rows = [header]
+            for o in orders:
+                color = "#4ade80" if o.action == "BUY" else "#f87171"
+                rows.append(html.Tr([
+                    html.Td(o.action, style={"padding": "4px 8px", "color": color, "fontWeight": "600", "fontSize": "11px"}),
+                    html.Td(f"{o.qty:,}", style={"padding": "4px 8px", "color": "#e8f2ff", "fontSize": "11px"}),
+                    html.Td(o.ticker, style={"padding": "4px 8px", "color": "#4a9eff", "fontSize": "11px"}),
+                    html.Td(o.reason, style={"padding": "4px 8px", "color": "#94b8cc", "fontSize": "10px"}),
+                    html.Td(f"{o.current_qty:+d} → {o.target_qty:+d}", style={"padding": "4px 8px", "color": "#7090a8", "fontSize": "10px"}),
+                ]))
+            table = html.Table(rows, style={"width": "100%", "borderCollapse": "collapse"})
+        else:
+            table = html.Div("✓ Portefeuille déjà aligné sur la cible — aucun ordre nécessaire.",
+                             style={"color": "#4ade80", "fontSize": "12px", "padding": "10px 0"})
+
+        # Sérialiser les ordres pour l'exécution
+        orders_data = _json.dumps([{
+            "ticker": o.ticker, "action": o.action, "qty": o.qty, "reason": o.reason
+        } for o in orders])
+
+        show_exec = {"display": "block"} if orders else {"display": "none"}
+        return summary, table, orders_data, show_exec
+
+    @app.callback(
+        Output("rebal-execute-status", "children"),
+        Input("rebal-execute-btn",     "n_clicks"),
+        State("rebal-orders-store",    "data"),
+        prevent_initial_call=True,
+    )
+    def execute_rebalance(n, orders_data):
+        if not n or not orders_data:
+            raise PreventUpdate
+        import json as _json
+        if not (is_ibkr and exec_engine.is_connected):
+            return html.Span("IBKR non connecté — lance en --mode live avec TWS ouvert.",
+                             style={"color": "#f87171"})
+
+        from execution.ibkr_live import IBKROrder
+        orders = _json.loads(orders_data)
+        logger.info(f"[Rebalance] Exécution de {len(orders)} ordres...")
+
+        results = []
+        n_ok = 0
+        for od in orders:
+            try:
+                order = IBKROrder(ticker=od["ticker"], action=od["action"],
+                                  qty=int(od["qty"]), order_type="MARKET")
+                fill = exec_engine.execute_order(order)
+                if fill:
+                    n_ok += 1
+                    results.append(f"✓ {od['action']} {od['qty']} {od['ticker']} @ {fill.fill_price:.2f}")
+                else:
+                    results.append(f"⏳ {od['action']} {od['qty']} {od['ticker']} — soumis (fill à l'ouverture)")
+            except Exception as e:
+                results.append(f"✗ {od['ticker']} — erreur : {e}")
+
+        summary_line = html.Div(f"Exécution terminée : {n_ok}/{len(orders)} remplis immédiatement.",
+                                style={"color": "#4ade80" if n_ok > 0 else "#f0a500",
+                                       "fontWeight": "600", "marginBottom": "8px"})
+        detail = html.Div([html.Div(r, style={"fontSize": "10px", "color": "#94b8cc",
+                          "fontFamily": "monospace"}) for r in results])
+        return html.Div([summary_line, detail])
