@@ -57,12 +57,12 @@ def layout(dp=None):
                 dcc.Dropdown(
                     id="rb-strategy",
                     options=[
-                        {"label": "Multi-facteur + HRP (recommandé)", "value": "hrp"},
-                        {"label": "Multi-facteur (inverse-vol)",       "value": "multifactor"},
-                        {"label": "Momentum seul (12M-1M)",            "value": "momentum"},
+                        {"label": "Momentum (12M-1M) — meilleur backtest, Sharpe 1.6", "value": "momentum"},
+                        {"label": "Multi-facteur + HRP — Sharpe 1.1",                    "value": "hrp"},
+                        {"label": "Multi-facteur (3 signaux) — Sharpe 0.8",             "value": "multifactor"},
                     ],
-                    value="hrp", clearable=False,
-                    style={"width": "320px"}),
+                    value="momentum", clearable=False,
+                    style={"width": "360px"}),
             ]),
             html.Div([
                 html.Div("CAPITAL CIBLE (€)", style=_LABEL),
