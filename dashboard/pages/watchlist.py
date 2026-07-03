@@ -87,6 +87,73 @@ def _row(label,val,color="#c8d8e8"):
     ],style={"display":"flex","justifyContent":"space-between","padding":"5px 0","borderBottom":"1px solid #1a2030"})
 
 
+def _decision_panel(info, close):
+    """
+    Panneau de décision : score 0-100 décomposé en 4 piliers, chaque point
+    justifié. C'est la synthèse « en un coup d'œil » de tout le reste.
+    """
+    try:
+        from dashboard.utils.decision_score import compute_decision
+        d = compute_decision(info or {}, close)
+    except Exception:
+        return html.Div()
+
+    score   = d["score"]
+    verdict = d["verdict"]
+    v_color = {"BUY": "#4ade80", "HOLD": "#f0a500", "AVOID": "#f87171"}[verdict]
+    pillar_names = {"momentum": "MOMENTUM", "quality": "QUALITÉ",
+                    "valuation": "VALORISATION", "risk": "RISQUE"}
+
+    pillar_rows = []
+    for key, p in d["pillars"].items():
+        ps = p["score"]
+        bar_color = "#4ade80" if ps >= 60 else "#f0a500" if ps >= 40 else "#f87171"
+        # Ligne pilier : nom + barre + score
+        pillar_rows.append(html.Div([
+            html.Div([
+                html.Span(pillar_names[key], style={"fontSize":"10px","color":"#94b8cc",
+                          "fontWeight":"600","width":"110px","display":"inline-block"}),
+                html.Span(f"{ps:.0f}", style={"fontSize":"11px","color":bar_color,
+                          "fontWeight":"700","marginLeft":"6px"}),
+                html.Span(f"  ×{p['weight']:.0%}", style={"fontSize":"9px","color":_MUTED}),
+            ]),
+            html.Div(style={"height":"5px","backgroundColor":"#1a2030","borderRadius":"3px",
+                            "marginTop":"3px","marginBottom":"4px"},
+                     children=html.Div(style={"height":"100%","width":f"{ps:.0f}%",
+                              "backgroundColor":bar_color,"borderRadius":"3px"})),
+            # Détails justificatifs : chaque composante avec ses points
+            html.Div([
+                html.Div([
+                    html.Span(f"{label} : ", style={"fontSize":"9px","color":_MUTED}),
+                    html.Span(f"{val}", style={"fontSize":"9px","color":"#c8d8e8","fontWeight":"600"}),
+                    html.Span(f" ({vdict})", style={"fontSize":"9px","color":_MUTED,"fontStyle":"italic"}),
+                    html.Span(f"  {'+' if pts>0 else ''}{pts}",
+                              style={"fontSize":"9px","fontWeight":"700",
+                                     "color":"#4ade80" if pts>0 else "#f87171" if pts<0 else _MUTED}),
+                ], style={"lineHeight":"1.5"})
+                for label, val, vdict, pts in p["details"]
+            ], style={"paddingLeft":"4px","marginBottom":"8px"}),
+        ]))
+
+    return html.Div([
+        html.Div("DÉCISION — SCORE JUSTIFIÉ", style=_LABEL),
+        # Gros verdict
+        html.Div([
+            html.Span(f"{score:.0f}", style={"fontSize":"36px","fontWeight":"800",
+                      "color":v_color,"letterSpacing":"-1px"}),
+            html.Span("/100  ", style={"fontSize":"14px","color":_MUTED}),
+            html.Span(verdict, style={"fontSize":"18px","fontWeight":"800","color":v_color,
+                      "backgroundColor":f"rgba({'74,222,128' if verdict=='BUY' else '240,165,0' if verdict=='HOLD' else '248,113,113'},.12)",
+                      "border":f"1px solid {v_color}","borderRadius":"6px",
+                      "padding":"3px 14px","marginLeft":"10px"}),
+        ], style={"marginBottom":"12px","display":"flex","alignItems":"baseline"}),
+        html.Div(pillar_rows),
+        html.Div("Pondération : Momentum 35% · Qualité 25% · Valo 20% · Risque 20%. "
+                 "Chaque ligne montre sa contribution en points.",
+                 style={"fontSize":"8px","color":"#3a5060","marginTop":"6px","fontStyle":"italic"}),
+    ], style=_CARD)
+
+
 def _fetch(yf_ticker,period="2y"):
     """Fetch Yahoo Finance avec fallback pour tickers récents (SPCX)."""
     try:
@@ -292,6 +359,7 @@ def _build_panel(ticker_key,config):
             ],width=8),
 
             dbc.Col([
+                _decision_panel(info, close),
                 html.Div([
                     html.Div("VALORISATION",style=_LABEL),
                     _row("P/E trailing",pe),_row("P/E forward",pe_fwd),

@@ -494,3 +494,68 @@ def multifactor_pipeline(returns: pd.DataFrame, top_n: int = 5) -> Dict[str, flo
         if t not in weights:
             weights[t] = -0.5 * inv_vol[t] / short_sum
     return weights
+
+
+def momentum_fundamental_pipeline(returns: pd.DataFrame, top_n: int = 5,
+                                   fundamentals: "pd.DataFrame | None" = None) -> Dict[str, float]:
+    """
+    Momentum + overlay fondamental (qualité/valorisation) — usage LIVE.
+
+    MÉTHODOLOGIE (et honnêteté) :
+    - Le signal PRINCIPAL reste le momentum 12M-1M (validé Sharpe ~1.6 en
+      walk-forward). Les fondamentaux servent d'OVERLAY : ils ajustent le
+      classement à la marge (±20% du score), pas ne le remplacent.
+    - Les fondamentaux (ROE, marges, P/E, D/E) viennent de yfinance et sont
+      des données ACTUELLES (point-in-time impossible avec la source gratuite).
+      → Ce pipeline est destiné au scoring LIVE et au rebalancing courant.
+      → Pour le BACKTEST historique, utiliser momentum_pipeline (pur prix),
+        sinon on introduirait un biais de look-ahead sur les fondamentaux.
+
+    Overlay fondamental (z-scores, moyennés) :
+      + returnOnEquity      (qualité : rentabilité)
+      + operatingMargins    (qualité : efficacité)
+      - trailingPE          (valorisation : moins cher = mieux)
+      - debtToEquity        (solidité : moins de dette = mieux)
+
+    Score final = 0.8 × z(momentum) + 0.2 × z(overlay fondamental)
+    Pondération finale : inverse-volatilité, 50% long / 50% short.
+    """
+    def _z(s: pd.Series) -> pd.Series:
+        s = s.astype(float)
+        sd = s.std()
+        return (s - s.mean()) / sd if sd and sd > 0 else s * 0
+
+    # Signal momentum (identique au pipeline validé)
+    f_mom = returns.tail(252).head(252 - 21).mean(axis=0)
+    score = _z(f_mom)
+
+    # Overlay fondamental si disponible
+    if fundamentals is not None and len(fundamentals) > 0:
+        f = fundamentals.reindex(score.index)
+        parts = []
+        if "returnOnEquity"   in f.columns: parts.append(_z(f["returnOnEquity"].fillna(f["returnOnEquity"].median())))
+        if "operatingMargins" in f.columns: parts.append(_z(f["operatingMargins"].fillna(f["operatingMargins"].median())))
+        if "trailingPE"       in f.columns:
+            pe = f["trailingPE"].clip(lower=0, upper=100)  # borner les extrêmes
+            parts.append(-_z(pe.fillna(pe.median())))
+        if "debtToEquity"     in f.columns:
+            de = f["debtToEquity"].clip(lower=0, upper=500)
+            parts.append(-_z(de.fillna(de.median())))
+        if parts:
+            fund_score = sum(parts) / len(parts)
+            score = 0.8 * score + 0.2 * fund_score.reindex(score.index).fillna(0)
+
+    ranked = score.sort_values(ascending=False)
+    longs  = ranked.head(top_n).index.tolist()
+    shorts = ranked.tail(top_n).index.tolist()
+
+    vol = returns.tail(63).std(axis=0)
+    inv_vol = {t: (1.0 / vol[t] if vol.get(t, 0) > 0 else 0.0) for t in longs + shorts}
+    ls = sum(inv_vol[t] for t in longs) or 1.0
+    ss = sum(inv_vol[t] for t in shorts) or 1.0
+
+    weights: Dict[str, float] = {}
+    for t in longs:  weights[t] = 0.5 * inv_vol[t] / ls
+    for t in shorts:
+        if t not in weights: weights[t] = -0.5 * inv_vol[t] / ss
+    return weights

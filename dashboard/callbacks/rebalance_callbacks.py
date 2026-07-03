@@ -49,8 +49,15 @@ def register_rebalance_callbacks(app, exec_engine=None):
 
         # Portefeuille cible
         try:
+            fundamentals = None
+            if strategy == "momentum_fundamental":
+                try:
+                    fundamentals = dp.get_fundamentals()  # mis en cache par le dp
+                except Exception:
+                    fundamentals = None
             targets = compute_target_portfolio(
-                returns, prices, capital=capital, top_n=top_n, strategy=strategy)
+                returns, prices, capital=capital, top_n=top_n,
+                strategy=strategy, fundamentals=fundamentals)
         except Exception as e:
             return (_err(f"Erreur calcul cible : {e}"), None, None, {"display": "none"})
         if not targets:
@@ -70,7 +77,8 @@ def register_rebalance_callbacks(app, exec_engine=None):
         # ── Carte résumé ──
         strat_label = {"hrp": "Multi-facteur + HRP",
                        "multifactor": "Multi-facteur (inverse-vol)",
-                       "momentum": "Momentum seul"}.get(strategy, strategy)
+                       "momentum": "Momentum seul",
+                       "momentum_fundamental": "Momentum + fondamentaux"}.get(strategy, strategy)
         summary_card = html.Div([
             html.Div("PORTEFEUILLE CIBLE", style={"fontSize": "10px", "color": "#7eb8d8",
                      "textTransform": "uppercase", "letterSpacing": ".08em",

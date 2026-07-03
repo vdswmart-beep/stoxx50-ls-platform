@@ -69,7 +69,7 @@ def layout(dp=None):
     n_shorts = kpis.get("n_shorts", 0)
     tickers  = dp.tickers if dp and hasattr(dp, "tickers") else []
 
-    # ── Positions avec P&L ────────────────────────────────────────
+    # ── Positions : RÉELLES (IBKR live) ou cibles (backtest) ──────
     positions_rows = []
     sector_exposure: dict = {}
 
@@ -83,51 +83,77 @@ def layout(dp=None):
     except Exception:
         current_prices = {}
 
-    # P&L calculé sur les fills stockés dans dp
-    fills = getattr(dp, "_fills", [])
+    # Détecter le mode live et lire le vrai compte IBKR
+    live = None
+    try:
+        if dp and kpis.get("is_live", False):
+            live = dp.get_live_account()
+    except Exception:
+        live = None
 
-    for ticker, weight in weights.items():
-        if abs(weight) < 1e-5:
-            continue
-
-        side      = "LONG" if weight > 0 else "SHORT"
-        notional  = abs(weight) * nav_val
-        curr_px   = current_prices.get(ticker)
-        name      = TICKER_NAMES.get(ticker, ticker)
-        sector    = SECTOR_MAP.get(ticker, "Other")
-
-        # Exposition sectorielle (pondérée)
-        sector_exposure[sector] = sector_exposure.get(sector, 0) + weight * 100
-
-        # P&L estimé depuis les fills
-        avg_fill = None
-        qty      = 0
-        for fill in fills:
-            if fill.get("ticker") == ticker:
-                avg_fill = fill.get("fill_price")
-                qty      = fill.get("qty", 0)
-
-        pnl_jpy = None
-        pnl_pct = None
-        if avg_fill and curr_px and qty:
-            if side == "LONG":
-                pnl_jpy = (curr_px - avg_fill) * qty
-                pnl_pct = (curr_px / avg_fill - 1) * 100
-            else:
-                pnl_jpy = (avg_fill - curr_px) * qty
-                pnl_pct = (avg_fill / curr_px - 1) * 100
-
-        positions_rows.append({
-            "ticker":    ticker,
-            "name":      name,
-            "sector":    sector,
-            "side":      side,
-            "weight":    f"{weight:.2%}",
-            "notional":  f"€{notional/1e6:.1f}M" if notional else "—",
-            "curr_px":   f"€{curr_px:,.0f}" if curr_px else "—",
-            "pnl_jpy":   pnl_jpy,
-            "pnl_pct":   pnl_pct,
-        })
+    if live is not None and live.get("positions"):
+        # ── MODE LIVE : vraies positions IBKR ──
+        for p in live["positions"]:
+            ticker = p["ticker"]
+            side   = p["side"]
+            qty    = p.get("qty", 0)
+            mp     = p.get("market_price")
+            mv     = p.get("market_value")
+            up     = p.get("unrealized_pnl")
+            name   = TICKER_NAMES.get(ticker, ticker)
+            sector = SECTOR_MAP.get(ticker, "Other")
+            # Exposition sectorielle depuis la valeur de marché réelle
+            if mv:
+                sector_exposure[sector] = sector_exposure.get(sector, 0) + (mv / nav_val * 100 if nav_val else 0)
+            pnl_pct = None
+            if up is not None and mv and mv != 0:
+                pnl_pct = up / abs(mv) * 100
+            positions_rows.append({
+                "ticker":   ticker,
+                "name":     name,
+                "sector":   sector,
+                "side":     side,
+                "weight":   f"{qty:+,}",              # en live : nb d'actions
+                "notional": f"€{mv:,.0f}" if mv else "—",
+                "curr_px":  f"€{mp:,.2f}" if mp else "—",
+                "pnl_jpy":  up,
+                "pnl_pct":  pnl_pct,
+            })
+    else:
+        # ── MODE BACKTEST : portefeuille cible (poids stratégie) ──
+        fills = getattr(dp, "_fills", [])
+        for ticker, weight in weights.items():
+            if abs(weight) < 1e-5:
+                continue
+            side      = "LONG" if weight > 0 else "SHORT"
+            notional  = abs(weight) * nav_val
+            curr_px   = current_prices.get(ticker)
+            name      = TICKER_NAMES.get(ticker, ticker)
+            sector    = SECTOR_MAP.get(ticker, "Other")
+            sector_exposure[sector] = sector_exposure.get(sector, 0) + weight * 100
+            avg_fill = None; qty = 0
+            for fill in fills:
+                if fill.get("ticker") == ticker:
+                    avg_fill = fill.get("fill_price"); qty = fill.get("qty", 0)
+            pnl_jpy = None; pnl_pct = None
+            if avg_fill and curr_px and qty:
+                if side == "LONG":
+                    pnl_jpy = (curr_px - avg_fill) * qty
+                    pnl_pct = (curr_px / avg_fill - 1) * 100
+                else:
+                    pnl_jpy = (avg_fill - curr_px) * qty
+                    pnl_pct = (avg_fill / curr_px - 1) * 100
+            positions_rows.append({
+                "ticker":    ticker,
+                "name":      name,
+                "sector":    sector,
+                "side":      side,
+                "weight":    f"{weight:.2%}",
+                "notional":  f"€{notional/1e6:.1f}M" if notional else "—",
+                "curr_px":   f"€{curr_px:,.0f}" if curr_px else "—",
+                "pnl_jpy":   pnl_jpy,
+                "pnl_pct":   pnl_pct,
+            })
 
     # Exposition sectorielle nette
     sector_fig = _sector_fig(sector_exposure, height=220)
@@ -169,10 +195,12 @@ def layout(dp=None):
         "textTransform":"uppercase","letterSpacing":".06em",
         "padding":"6px 10px","borderBottom":"1px solid #1e2a38","textAlign":align,
     })
+    _is_live_view = live is not None and bool(live.get("positions"))
+    _qty_label = "Qty" if _is_live_view else "Weight"
     positions_table = html.Table([
         html.Thead(html.Tr([
             th("Ticker"), th("Name"), th("Sector"),
-            th("Side"), th("Weight","right"), th("Notional","right"),
+            th("Side"), th(_qty_label,"right"), th("Notional","right"),
             th("Price","right"), th("P&L (€)","right"), th("P&L (%)","right"),
         ])),
         html.Tbody([pos_row(p) for p in positions_rows] if positions_rows else [

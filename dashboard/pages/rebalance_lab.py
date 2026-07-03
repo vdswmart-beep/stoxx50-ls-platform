@@ -58,11 +58,12 @@ def layout(dp=None):
                     id="rb-strategy",
                     options=[
                         {"label": "Momentum (12M-1M) — meilleur backtest, Sharpe 1.6", "value": "momentum"},
+                        {"label": "Momentum + fondamentaux (overlay ROE/marges/P-E)",   "value": "momentum_fundamental"},
                         {"label": "Multi-facteur + HRP — Sharpe 1.1",                    "value": "hrp"},
                         {"label": "Multi-facteur (3 signaux) — Sharpe 0.8",             "value": "multifactor"},
                     ],
                     value="momentum", clearable=False,
-                    style={"width": "360px"}),
+                    style={"width": "380px"}),
             ]),
             html.Div([
                 html.Div("CAPITAL CIBLE (€)", style=_LABEL),

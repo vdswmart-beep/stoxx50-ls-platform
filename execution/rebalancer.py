@@ -45,17 +45,20 @@ def compute_target_portfolio(
     prices: Dict[str, float],
     capital: float = DEFAULT_CAPITAL_EUR,
     top_n: int = 5,
-    strategy: str = "hrp",
+    strategy: str = "momentum",
+    fundamentals=None,
 ) -> List[TargetPosition]:
     """
     Calcule le portefeuille cible à partir des signaux de la stratégie choisie.
 
     Args:
-        returns  : DataFrame de rendements quotidiens (colonnes = tickers)
-        prices   : dict {ticker: prix unitaire actuel}
-        capital  : capital total à déployer (défaut 1M€)
-        top_n    : nb de positions par côté (défaut 5)
-        strategy : "hrp" | "multifactor" | "momentum"
+        returns      : DataFrame de rendements quotidiens (colonnes = tickers)
+        prices       : dict {ticker: prix unitaire actuel}
+        capital      : capital total à déployer (défaut 1M€)
+        top_n        : nb de positions par côté (défaut 5)
+        strategy     : "momentum" | "momentum_fundamental" | "hrp" | "multifactor"
+        fundamentals : DataFrame de fondamentaux (requis pour momentum_fundamental,
+                       typiquement dp.get_fundamentals() qui est mis en cache)
 
     Returns:
         Liste de TargetPosition (2*top_n positions : long + short).
@@ -67,6 +70,10 @@ def compute_target_portfolio(
         weights = hrp_long_short_pipeline(returns, top_n=top_n)
     elif strategy == "multifactor":
         weights = multifactor_pipeline(returns, top_n=top_n)
+    elif strategy == "momentum_fundamental":
+        from backtesting.backtest_engine import momentum_fundamental_pipeline
+        weights = momentum_fundamental_pipeline(returns, top_n=top_n,
+                                                fundamentals=fundamentals)
     else:
         weights = momentum_pipeline(returns, top_n=top_n)
 
