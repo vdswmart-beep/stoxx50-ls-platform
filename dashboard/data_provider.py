@@ -464,23 +464,95 @@ class DashboardDataProvider:
         except Exception as e:
             logger.error(f"get_factor_data: {e}"); return pd.DataFrame()
 
-    def get_ic_series(self):
-        if self._ic_cache is not None: return self._ic_cache
+    def get_ic_series(self, factor: str = "mom_12_1", horizon: int = 21):
+        """
+        Série d'Information Coefficients : corrélation de Spearman entre le
+        facteur à la date t et les rendements forward t → t+horizon.
+
+        Facteurs disponibles :
+          mom_12_1 : momentum 12M-1M (LE signal de la stratégie) — défaut
+          mom_1m   : momentum 1 mois (exhibe le short-term reversal → IC négatif
+                     attendu ; c'est précisément pourquoi la stratégie l'exclut)
+          low_vol  : -volatilité 3M (anomalie low-vol)
+          mom_6m   : momentum 6 mois
+
+        IMPORTANT (fix) : l'ancienne version calculait l'IC sur le momentum 1 mois
+        (les 21 derniers jours), qui n'est PAS le facteur de la stratégie. Son IC
+        négatif reflétait le reversal court-terme documenté (Jegadeesh 1990),
+        pas un défaut de la stratégie.
+        """
+        cache_key = f"{factor}_{horizon}"
+        if self._ic_cache is not None and getattr(self, "_ic_cache_key", None) == cache_key:
+            return self._ic_cache
         try:
-            returns=self.get_returns()
-            if returns.empty: return pd.DataFrame([{"date":pd.Timestamp.now(),"ic":0.0}])
-            rows=[]
-            for i in range(42,len(returns.index),21):
-                w=returns.iloc[i-21:i]; fwd=returns.iloc[i:i+21] if i+21<=len(returns) else None
-                if fwd is None or fwd.empty: break
-                aligned=pd.concat([w.mean(),fwd.mean()],axis=1).dropna()
-                if len(aligned)<3: continue
-                c=float(aligned.iloc[:,0].corr(aligned.iloc[:,1],method="spearman"))
-                rows.append({"date":returns.index[i],"ic":c})
-            df=pd.DataFrame(rows) if rows else pd.DataFrame([{"date":pd.Timestamp.now(),"ic":0.0}])
-            self._ic_cache=df; return df
+            returns = self.get_returns()
+            if returns.empty:
+                return pd.DataFrame([{"date": pd.Timestamp.now(), "ic": 0.0}])
+
+            def _signal(past: pd.DataFrame) -> pd.Series:
+                if factor == "mom_12_1":
+                    return past.tail(252).head(252 - 21).mean()
+                if factor == "mom_1m":
+                    return past.tail(21).mean()
+                if factor == "mom_6m":
+                    return past.tail(126).mean()
+                if factor == "low_vol":
+                    return -past.tail(63).std()
+                return past.tail(252).head(252 - 21).mean()
+
+            # Il faut 12 mois d'historique pour le facteur 12M-1M
+            start = 273 if factor in ("mom_12_1",) else 130 if factor == "mom_6m" else 70
+            rows = []
+            for i in range(start, len(returns.index) - horizon, 21):
+                past = returns.iloc[:i]
+                sig  = _signal(past)
+                fwd  = returns.iloc[i:i + horizon].mean()
+                aligned = pd.concat([sig, fwd], axis=1).dropna()
+                if len(aligned) < 5:
+                    continue
+                c = float(aligned.iloc[:, 0].corr(aligned.iloc[:, 1], method="spearman"))
+                rows.append({"date": returns.index[i], "ic": c})
+            df = pd.DataFrame(rows) if rows else pd.DataFrame([{"date": pd.Timestamp.now(), "ic": 0.0}])
+            self._ic_cache = df
+            self._ic_cache_key = cache_key
+            return df
         except Exception as e:
-            logger.error(f"get_ic_series: {e}"); return pd.DataFrame([{"date":pd.Timestamp.now(),"ic":0.0}])
+            logger.error(f"get_ic_series: {e}")
+            return pd.DataFrame([{"date": pd.Timestamp.now(), "ic": 0.0}])
+
+    def get_ic_summary(self):
+        """
+        Compare l'IC de plusieurs facteurs — pour la validation de facteurs
+        dans le Research Lab. Retourne une liste de dicts triée par IC IR.
+        """
+        factors = [
+            ("mom_12_1", "Momentum 12M-1M (stratégie)"),
+            ("mom_6m",   "Momentum 6M"),
+            ("low_vol",  "Low-Volatility"),
+            ("mom_1m",   "Momentum 1M (reversal)"),
+        ]
+        out = []
+        for key, label in factors:
+            # bypass du cache mono-facteur
+            self._ic_cache = None
+            df = self.get_ic_series(factor=key)
+            self._ic_cache = None
+            if df.empty or "ic" not in df.columns:
+                continue
+            s = df["ic"].dropna()
+            if len(s) < 3:
+                continue
+            ic_mean = float(s.mean())
+            ic_std  = float(s.std())
+            out.append({
+                "factor": key, "label": label,
+                "ic_mean": round(ic_mean, 3),
+                "ic_ir":   round(ic_mean / ic_std, 2) if ic_std > 0 else 0.0,
+                "hit":     round(float((s > 0).mean() * 100), 1),
+                "n_obs":   int(len(s)),
+            })
+        out.sort(key=lambda r: r["ic_ir"], reverse=True)
+        return out
 
     # ── Backtest ─────────────────────────────────────────────────
     def get_backtest_result(self): return self._last_backtest

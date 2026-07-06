@@ -151,6 +151,17 @@ def _full_detail(idea, dp):
     except Exception:
         sector = idea.get("sector","Unknown")
 
+    # ── Panneau DÉCISION (même moteur que la watchlist) ──────────
+    decision_panel = html.Div()
+    try:
+        from dashboard.pages.watchlist import _decision_panel
+        close_series = (price_df["close"].astype(float)
+                        if not price_df.empty and "close" in price_df.columns
+                        else pd.Series([]))
+        decision_panel = _decision_panel(info, close_series)
+    except Exception:
+        decision_panel = html.Div()
+
     return html.Div([
         # Header
         html.Div([
@@ -193,8 +204,10 @@ def _full_detail(idea, dp):
                 ], style=_CARD),
             ], width=7),
 
-            # Colonne droite : signaux + exécution
+            # Colonne droite : décision + signaux + exécution
             dbc.Col([
+                # Panneau DÉCISION justifié (même moteur que watchlist)
+                decision_panel,
                 # Signaux factoriels
                 html.Div([
                     html.Div("SIGNAUX FACTORIELS", style=_LABEL),

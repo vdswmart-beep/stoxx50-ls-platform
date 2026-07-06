@@ -196,3 +196,82 @@ def _orders_table(orders):
             html.Td(f"{o.current_qty:+d} → {o.target_qty:+d}", style={"padding": "5px 10px", "color": "#7090a8", "fontSize": "11px"}),
         ]))
     return html.Div(html.Table(rows, style={"width": "100%", "borderCollapse": "collapse"}))
+
+
+def register_strategy_monitor_callbacks(app):
+    """Moniteur de stratégies (Overview) : Sharpe live par stratégie."""
+    dp = app.data_provider
+
+    @app.callback(
+        Output("sm-results", "children"),
+        Input("sm-refresh-btn", "n_clicks"),
+        prevent_initial_call=True,
+    )
+    def refresh_monitor(n):
+        if not n:
+            raise PreventUpdate
+        from dashboard.utils.strategy_monitor import compute_live_sharpes
+        try:
+            res = compute_live_sharpes(dp, force=(n > 1))
+        except Exception as e:
+            return _err(f"Erreur calcul : {e}")
+        if res.get("error"):
+            return _err(res["error"])
+
+        rows = res.get("rows", [])
+        if not rows:
+            return _err("Aucun résultat.")
+
+        best_sharpe = max((r["sharpe"] or -99) for r in rows)
+
+        # Cartes par stratégie (le "rouleau")
+        cards = []
+        for r in rows:
+            is_best = (r["sharpe"] == best_sharpe and r["sharpe"] is not None)
+            sh = r["sharpe"]
+            sh_color = (_GREEN if sh and sh >= 1.2 else
+                        "#f0a500" if sh and sh >= 0.7 else _RED) if sh is not None else _MUTED
+            lw = r.get("last_window")
+            lw_color = _GREEN if (lw or 0) >= 0 else _RED
+            cards.append(html.Div([
+                html.Div([
+                    html.Span(r["label"], style={"fontSize":"11px","fontWeight":"700",
+                              "color":"#e8f2ff"}),
+                    html.Span(" ★ MEILLEUR", style={"fontSize":"8px","color":_GREEN,
+                              "fontWeight":"700","marginLeft":"6px"}) if is_best else None,
+                ]),
+                html.Div(f"{sh:.2f}" if sh is not None else "—",
+                         style={"fontSize":"26px","fontWeight":"800","color":sh_color,
+                                "lineHeight":"1.1","margin":"4px 0"}),
+                html.Div("Sharpe (OOS)", style={"fontSize":"8px","color":_MUTED,
+                         "textTransform":"uppercase","marginBottom":"6px"}),
+                html.Div([
+                    html.Span(f"Rend. {r['total_return']:+.0f}%  " if r['total_return'] is not None else "",
+                              style={"fontSize":"9px","color":"#94b8cc"}),
+                    html.Span(f"DD {r['max_dd']:.0f}%  " if r['max_dd'] is not None else "",
+                              style={"fontSize":"9px","color":"#94b8cc"}),
+                    html.Span(f"Win {r['win_rate']:.0f}%" if r['win_rate'] is not None else "",
+                              style={"fontSize":"9px","color":"#94b8cc"}),
+                ]),
+                html.Div([
+                    html.Span("Dernière fenêtre : ", style={"fontSize":"9px","color":_MUTED}),
+                    html.Span(f"{lw:+.1f}%" if lw is not None else "—",
+                              style={"fontSize":"10px","fontWeight":"700","color":lw_color}),
+                ], style={"marginTop":"4px"}),
+                html.Div(r["note"], style={"fontSize":"8px","color":"#3a5060",
+                         "marginTop":"6px","fontStyle":"italic"}),
+            ], style={
+                "flex":"1","minWidth":"170px","padding":"12px 14px",
+                "backgroundColor":"#0a0e14",
+                "border":f"1px solid {'#2d5a3d' if is_best else '#1e2a38'}",
+                "borderRadius":"8px",
+            }))
+
+        return html.Div([
+            html.Div(cards, style={"display":"flex","gap":"10px","flexWrap":"wrap"}),
+            html.Div(f"Calculé à {res['computed_at']} (il y a {res['age_min']} min) · "
+                     f"walk-forward 12M train / 3M test sur données à jour · "
+                     f"« Dernière fenêtre » = perf out-of-sample la plus récente. "
+                     f"Choisis la stratégie puis va dans ⚖ Rebalancing.",
+                     style={"fontSize":"9px","color":"#3a5060","marginTop":"8px"}),
+        ])

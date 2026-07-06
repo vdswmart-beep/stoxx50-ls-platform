@@ -240,6 +240,23 @@ def layout(dp=None):
                          sub=f"{len(tickers)} tickers"), width=3),
         ], className="g-3", style={"marginBottom":"14px"}),
 
+        # ── MONITEUR DE STRATÉGIES : Sharpe live par stratégie ──
+        html.Div([
+            html.Div([
+                html.Span("MONITEUR DE STRATÉGIES — Sharpe walk-forward au moment T",
+                          style=_LABEL),
+                html.Button("⟳ Recalculer", id="sm-refresh-btn", n_clicks=0, style={
+                    "backgroundColor":"transparent","color":"#4a9eff",
+                    "border":"1px solid #4a9eff","borderRadius":"5px",
+                    "padding":"4px 14px","fontSize":"11px","fontWeight":"600",
+                    "cursor":"pointer","marginLeft":"auto"}),
+            ], style={"display":"flex","alignItems":"center","marginBottom":"10px"}),
+            html.Div(id="sm-results",
+                     children=html.Div("Clique « Recalculer » pour comparer les stratégies "
+                                       "sur les données à jour (10-30s). Résultat gardé 1h.",
+                                       style={"fontSize":"11px","color":"#5a7080","padding":"8px 0"})),
+        ], style=_CARD),
+
         # Equity curve + Sector exposure
         dbc.Row([
             dbc.Col(html.Div([
