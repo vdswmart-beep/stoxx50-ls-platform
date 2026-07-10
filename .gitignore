@@ -1,2 +1,16 @@
 real_portfolio/
 real_portfolio/
+.DS_Store
+**/.DS_Store
+
+__pycache__/
+
+**/__pycache__/
+*.pyc
+*.pyo
+venv*/
+.venv/
+logs/*.log
+cache/
+*.log
+real_portfolio/
