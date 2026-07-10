@@ -1,55 +1,63 @@
 #!/usr/bin/env python3
-# test_ic.py — IC corrige : compare les facteurs sur tes donnees reelles
-# Usage : python test_ic.py
+# test_frequency.py — quelle frequence de rebalancement ? (Sharpe brut, turnover, Sharpe NET de couts)
+# Usage : python test_frequency.py
 
 import sys, logging
 sys.path.insert(0, ".")
 logging.disable(logging.CRITICAL)
 import pandas as pd, numpy as np
 
-print("=" * 72)
-print("  INFORMATION COEFFICIENTS — facteurs compares (donnees reelles)")
-print("=" * 72)
+print("=" * 74)
+print("  FREQUENCE DE REBALANCEMENT — Sharpe brut vs NET de couts (donnees reelles)")
+print("=" * 74)
 
 from config.universe import get_universe
 from data.data_service import DataService
+from backtesting.backtest_engine import BacktestEngine, momentum_pipeline
 
 tickers = get_universe("full")
 ds = DataService(mode="backtest")
 returns = ds.get_returns(tickers, "2022-01-01", "2026-01-01")
-print(f"\nDonnees : {returns.shape[1]} tickers, {len(returns)} jours\n")
+print(f"\nDonnees : {returns.shape[1]} tickers, {len(returns)} jours")
 
-FACTORS = {
-    "Momentum 12M-1M (STRATEGIE)": lambda p: p.tail(252).head(231).mean(),
-    "Momentum 6M":                 lambda p: p.tail(126).mean(),
-    "Low-Volatility":              lambda p: -p.tail(63).std(),
-    "Momentum 1M (ANCIEN CALCUL)": lambda p: p.tail(21).mean(),
-}
+COST_BPS = 10   # 10 bps par unite de turnover (commission ~5bps + spread ~5bps, large caps EU)
 
-print(f"{'Facteur':<30}{'IC Mean':>9}{'IC IR':>8}{'Hit%':>7}{'Obs':>6}")
-print("-" * 72)
-for name, fn in FACTORS.items():
-    start = 273 if "12M" in name else 130 if "6M" in name else 70
-    ics = []
-    for i in range(start, len(returns) - 21, 21):
-        sig = fn(returns.iloc[:i])
-        fwd = returns.iloc[i:i+21].mean()
-        al = pd.concat([sig, fwd], axis=1).dropna()
-        if len(al) < 5: continue
-        ics.append(float(al.iloc[:,0].corr(al.iloc[:,1], method="spearman")))
-    s = pd.Series(ics)
-    ir = s.mean()/s.std() if s.std() > 0 else 0
-    flag = " ← ta strategie" if "STRATEGIE" in name else " ← l'ancien IC bugge" if "ANCIEN" in name else ""
-    print(f"{name:<30}{s.mean():>+9.3f}{ir:>+8.2f}{(s>0).mean()*100:>6.0f}%{len(s):>6}{flag}")
-print("-" * 72)
-print("""
+def turnover_series(windows):
+    """Somme |Δw| entre fenetres consecutives (unites de gross tradees)."""
+    tos = []
+    prev = {}
+    for w in windows:
+        cur = dict(w.weights)
+        keys = set(prev) | set(cur)
+        to = sum(abs(cur.get(k, 0) - prev.get(k, 0)) for k in keys)
+        tos.append(to)
+        prev = cur
+    return tos
+
+print(f"\n{'Frequence':<14}{'Sharpe':>8}{'Rend.':>9}{'MaxDD':>8}"
+      f"{'Turnover/reb':>13}{'Cout/an':>9}{'Sharpe NET':>11}")
+print("-" * 74)
+for tm, label in [(1, "Mensuelle"), (3, "Trimestrielle"), (6, "Semestrielle")]:
+    res = BacktestEngine(train_months=12, test_months=tm).run(returns, momentum_pipeline)
+    m = res.metrics
+    tos = turnover_series(res.windows)
+    avg_to = float(np.mean(tos[1:])) if len(tos) > 1 else 0   # ignorer l'initiation
+    n_reb_per_year = 12 / tm
+    annual_cost = avg_to * n_reb_per_year * COST_BPS / 10_000
+    ann_ret, ann_vol = m.get("ann_return", 0), m.get("ann_vol", 1e-9)
+    net_sharpe = (ann_ret - annual_cost) / ann_vol if ann_vol > 0 else 0
+    star = " ★" if tm == 3 else ""
+    print(f"{label:<14}{m['sharpe']:>8.2f}{m['total_return']*100:>+8.1f}%"
+          f"{m['max_drawdown']*100:>7.1f}%{avg_to:>12.0%}"
+          f"{annual_cost*100:>8.2f}%{net_sharpe:>11.2f}{star}")
+print("-" * 74)
+print(f"""
 LECTURE :
-- L'ancien Research Lab mesurait le Momentum 1M → IC negatif = short-term
-  reversal (les gagnants du mois corrigent). C'est un resultat CONNU de la
-  litterature, pas un defaut de ta strategie.
-- Le facteur de TA strategie (12M-1M) doit montrer un IC positif — coherent
-  avec son Sharpe de 1.6 en walk-forward.
-- Un IC de +0.03 a +0.08 sur 50 titres est tout a fait respectable : avec
-  seulement 50 noms, l'IC cross-sectionnel est bruite par construction.
+- Turnover/reb = part du gross tradee a chaque rebalancement (Σ|Δw|).
+- Cout/an = turnover x frequence x {COST_BPS} bps (commission + spread, large caps).
+- Le Sharpe NET est celui qui compte : la frequence gagnante brute peut
+  perdre une fois les couts inclus.
+- Regle de decision : choisis la frequence au meilleur Sharpe NET, a
+  condition qu'elle reste dans la zone validee par les tests de robustesse.
 """)
-print("=" * 72)
+print("=" * 74)

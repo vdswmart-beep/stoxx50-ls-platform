@@ -1,173 +1,164 @@
-# NK225 — Long/Short Equity Research & Derivatives Platform
+# Helios Capital — EURO STOXX 50 Long/Short Equity & Options Platform
 
-> A professional-grade quantitative research, trading and options platform built to hedge fund standards. Generates, analyses and executes long/short equity strategies on the Nikkei 225 and a buy-side watchlist, with a full European-options analytics desk.
+A systematic long/short equity research platform covering the 50 constituents of the
+EURO STOXX 50 — from signal generation to live order execution. Built in Python with
+an interactive Dash interface and live Interactive Brokers integration.
 
-[![Python](https://img.shields.io/badge/Python-3.12-blue?logo=python&logoColor=white)](https://python.org)
-[![Dash](https://img.shields.io/badge/Dash-2.18-cyan?logo=plotly)](https://dash.plotly.com)
-[![License](https://img.shields.io/badge/License-MIT-green)](LICENSE)
-
----
-
-## Why This Project
-
-I built this platform out of a genuine passion for long/short equity investing and quantitative finance. Long/short strategies fascinate me because they separate alpha generation from market direction — the goal is not to predict whether the market goes up or down, but to identify **relative mispricings** between securities.
-
-The Nikkei 225 is a particularly interesting universe for L/S strategies: high dispersion across sectors (automotive, semiconductors, financials, healthcare) creates abundant pair opportunities, macro sensitivity to USD/JPY and Bank of Japan policy generates recurring factor rotations, and structural inefficiencies persist due to cross-shareholding structures and the late adoption of shareholder returns.
-
-This tool is my attempt to build the research infrastructure a fundamental L/S analyst would actually use — from factor scoring to walk-forward backtesting, paper-trade execution, and a complete options pricing desk for hedging and expressing views with convexity.
+**Repository:** https://github.com/vdswmart-beep/stoxx50-ls-platform
 
 ---
 
-## What It Does
+## What it does
 
-Most retail investors either go long-only or have no systematic framework to evaluate short candidates. This platform provides a rigorous, data-driven workflow to:
+Helios reproduces the full workflow of a systematic equity desk:
 
-1. **Score** every stock in the Nikkei 225 across multiple factor dimensions
-2. **Rank** them into long and short candidates with conviction levels and an estimated holding horizon
-3. **Validate** each idea manually with a full fundamental + momentum fiche before committing
-4. **Backtest** the resulting L/S strategy with realistic transaction costs
-5. **Execute** paper trades (Interactive Brokers or local simulation) with an automatic −6% stop-loss per position
-6. **Price options** on the watchlist with a full Black-Scholes desk (Greeks, strategies, parity, vol surface)
-
----
-
-## Platform Map
-
-```
-Data (Yahoo Finance) ─────────────────► Research & Idea Generation
-                                          │
-IBKR (execution only) ◄── Paper trades ──┤
-                                          ▼
-   Factor Scoring → Idea Lab → Manual validation → Execution → Track record
-                                          │
-                                          ├─► Pair Trading (Math Lab)
-                                          ├─► Walk-forward Backtest
-                                          ├─► Risk (VaR, CVaR, stress)
-                                          └─► Options Lab (Black-Scholes desk)
-```
+- **Alpha signal** — a market-neutral momentum long/short (12M-1M, inverse-volatility
+  weighting); multi-factor and Hierarchical Risk Parity variants also implemented.
+- **Backtesting** — strict walk-forward, out-of-sample, **net of transaction costs**.
+- **Risk** — VaR/CVaR, drawdown analytics, stress tests (2008, COVID, ECB shocks).
+- **Factor validation** — Information Coefficient (Spearman) per factor.
+- **Options desk** — Black-Scholes pricing, full Greeks, implied-vol solver, 11
+  strategies, a **custom structured-products builder**, put-call parity, vol surface.
+- **Pair trading** — OLS cointegration spread with z-score mean reversion.
+- **Live execution** — IBKR paper-trading: signal → target portfolio → one-click orders.
 
 ---
 
-## Dashboard Pages
+## Signal validation — three independent checks
 
-| Route | Page | Description |
-|-------|------|-------------|
-| `/` | Overview | Real portfolio: positions, P&L per position, sector exposure, NAV |
-| `/research` | Research Lab | IC analysis, rolling Spearman, factor scores |
-| `/ideas` | Idea Lab | Long/short candidates ranked by conviction — click any card for a full fiche (price, fundamentals, momentum, vol, beta, Z-scores) + one-click execution |
-| `/math` | Math Lab | **Pair trading**: spread, z-score signals, cointegration, rolling beta/correlation, spread backtest |
-| `/ai` | AI Lab | AI-generated investment hypotheses (Groq / Llama 3.3) |
-| `/backtest` | Backtest Lab | Walk-forward backtesting with full performance metrics |
-| `/portfolio` | Portfolio | NAV, allocation, positions table |
-| `/risk` | Risk Lab | VaR, CVaR, drawdown profile, stress tests |
-| `/watchlist` | Watchlist | Buy-side deep dive on JPM · ISRG · SPCX · Eni — price, technicals, valuation, financials, bull/bear, trade buttons |
-| `/options` | **Options Lab** | European options desk: Pricer · Greeks · Strategies · Parity · Vol Surface |
-| `/execution` | Execution Lab | Paper trading, order blotter, delta vs target weights |
-| `/company` | Company Analyzer | Price history + fundamentals vs sector peers for any Nikkei name |
+The default momentum strategy on the 50-name universe (2022–2026), evaluated three
+separate ways that all point the same direction:
 
----
+| Check | Result |
+|---|---|
+| **Walk-forward backtest** (net of costs) | Sharpe ≈ 1.6 · ann. return ≈ 20% · max DD < 10% · 10/12 windows positive |
+| **Robustness** — sensitivity to settings | Sharpe 1.3–1.6 across 3–8 positions · positive across all look-backs · positive every calendar year |
+| **Information Coefficient** — signal quality | Spearman IC ≈ +0.11 · IC IR ≈ 0.57 · hit rate 66% |
 
-## Options Lab — European Options Desk
+Multi-factor (Sharpe ≈ 0.8) and HRP (≈ 1.1) variants were benchmarked; on this universe
+the pure momentum signal proved most robust — the low-volatility factor actually
+predicted returns inversely (IC ≈ −0.08), so adding it hurt. A deliberate finding:
+added complexity does not guarantee better performance.
 
-A complete equity-derivatives analytics suite, priced on the watchlist underlyings (JPM, ISRG, SPCX, Eni). The pricing engine is fully vectorised and framework-agnostic.
-
-- **Pricer** — Black-Scholes price + full Greeks (desk units: vega/ρ per 1%, θ per day) for any strike/expiry/type, with a live payoff diagram.
-- **Greeks Explorer** — interactive sliders (spot, strike, vol, maturity) that reprice Greeks instantly, with a delta-vs-spot profile for call and put.
-- **Strategy Builder** — 11 strategies (spreads, butterflies, straddles, strangles, iron butterfly, covered call, protective put, fiduciary call…), each with net cost, max profit/loss, break-evens, aggregated book Greeks and a P&L payoff chart.
-- **Put-Call Parity** — residual check against the cash-and-carry relation `C − P = S·e⁻qT − K·e⁻rT`, with an honest reminder that flags are a screening signal, not free money.
-- **Volatility Surface** — 3-D IV surface (strike × maturity × IV), vol smiles by expiry, and the ATM term structure.
-
-The option chain is generated by a `MockProvider` that pulls the **live spot from Yahoo Finance** and synthesises a self-consistent European chain with a realistic equity skew. Every premium is the model value at the assumed vol surface — an honest theoretical pricer suitable for a research and track-record context. The architecture supports plugging in a live provider (Barchart, IBKR) without touching the analytics layer.
+> Transaction costs (~8 bps per unit turnover) are modelled in the backtest, so the
+> reported Sharpe is **net of costs**, not gross.
 
 ---
 
-## Key Features (Equity)
+## How the strategy works (short version)
 
-- **Idea Lab with manual validation** — the workflow of a junior L/S analyst: the scoring engine generates ranked long/short candidates with an estimated holding horizon by conviction (HIGH long 3–6 months, etc.); clicking a card opens a full fiche with price chart, fundamentals, momentum (1M/3M/6M/12M), realised vol, beta and cross-sectional Z-scores (momentum / quality / value / sector) so every trade is checked before execution.
-- **Sector-aware L/S scoring** — composite of momentum (40%), quality (25%), value (20%) and intra-sector positioning (15%), with Z-scores computed cross-sectionally and within each sector.
-- **Pair trading** — spread = log(A) − β·log(B) with rolling OLS beta, z-score entry/exit signals, Engle-Granger cointegration and ADF tests, rolling correlation, and a spread backtest (Sharpe, number of trades).
-- **Automatic −6% stop-loss** — a monitor checks open positions every 60 seconds and closes any position breaching −6% P&L automatically (IBKR or simulated).
-- **Walk-forward backtesting** — train/test windows that avoid look-ahead bias, realistic slippage and commission, full metrics (Sharpe, Sortino, Calmar, Max Drawdown, Win Rate, Profit Factor, VaR/CVaR), monthly PnL heatmap, and one-click Excel export.
+**Stock selection**, at each rebalancing date:
+1. Rank all 50 stocks by momentum = mean daily return over months −12 to −1 (skip the
+   last month to avoid short-term reversal).
+2. Go **long the top 5**, **short the bottom 5**; ignore the middle 40.
+3. Size each position by **inverse volatility** (risk parity), scaled to 50% long /
+   50% short → gross 100%, net ≈ 0% (market-neutral).
 
----
+**Rebalancing** (the "Rebalancing" tab, one click): compute the target portfolio in
+shares → read current IBKR positions → `order = target − current` → review the order
+list → route all orders to IBKR.
 
-## Technical Stack
+**How often:** rebalance on a **fixed quarterly schedule** (matches the tested holding
+period). Check the Overview daily for monitoring, but only act off-schedule on a risk
+breach (−6% stop-loss) or sustained signal decay (2+ negative windows). Do not
+performance-chase.
 
-| Layer | Technology |
-|-------|-----------|
-| Language | Python 3.12 |
-| Dashboard | Dash 2.18 · Plotly · Dash Bootstrap Components |
-| Data | Yahoo Finance (yfinance) · IBKR TWS API (ib-insync, execution only) |
-| Computation | pandas · NumPy · SciPy · statsmodels |
-| Options engine | Vectorised Black-Scholes-Merton · Newton-Raphson + Brent IV solver · scattered-data vol surface (griddata) |
-| AI | Groq API (Llama 3.3-70B) with auto-routing |
-| Reporting | openpyxl (Excel track record) |
+See the **Strategy & Operating Manual** and **Methodology Guide** for step-by-step detail.
 
 ---
 
-## Quick Start
+## The 13 pages
 
-```bash
-# 1. Clone and install
-git clone https://github.com/vdswmart-beep/nk225-platform.git
-cd nk225-platform
-pip install -r requirements.txt
-
-# 2. Configure
-cp .env.example .env
-# Add your Groq API key (free at console.groq.com): GROQ_API_KEY=gsk_...
-
-# 3. Launch
-python run_dashboard.py                      # Full Nikkei 225 (185 tickers, ~3 min first load)
-python run_dashboard.py --universe liquid40   # 40 most liquid tickers (fast start)
-python run_dashboard.py --mode live           # Connect IBKR paper trading (port 7497)
-```
-
-**IBKR paper trading** (optional): open TWS, enable *Edit → Global Configuration → API → Enable ActiveX and Socket Clients*, port 7497, then run with `--mode live`. Yahoo Finance is always used for research data; IBKR is used only to route orders. Without `--mode live`, paper trading is simulated locally in Python.
+Overview (+ Strategy Monitor) · Research Lab (factor IC) · Idea Lab (4-pillar scoring) ·
+Math Lab (cointegration pairs) · AI Lab · Backtest Lab · Portfolio · Risk Lab ·
+Watchlist (decision score) · Options Lab (incl. structured products) · Execution ·
+Rebalancing · Company Analyzer.
 
 ---
 
 ## Architecture
 
 ```
-nk225-platform/
-├── config/        # Universe (185 tickers), settings, factor weights
-├── data/          # Provider pattern: Yahoo Finance, loaders, cache
-├── features/      # Momentum, volatility, value, quality, technical factors
-├── ideas/         # Sector-aware L/S scoring engine with duration estimates
-├── research/      # IC analysis, statistical tests
-├── portfolio/     # Risk Parity, HRP, Mean-Variance optimiser
-├── risk/          # VaR, CVaR, drawdown, stress testing
-├── backtesting/   # Walk-forward engine, performance metrics
-├── execution/     # Paper trading simulation + IBKR live connector (thread-safe)
-├── reporting/     # Excel track-record exporter
-├── ai/            # Groq / Grok / Ollama clients with auto-routing
-├── options/       # European-options desk (framework-agnostic engine)
-│   ├── pricing/     # Black-Scholes, implied vol solver, put-call parity
-│   ├── volatility/  # Smiles, term structure, 3-D surface
-│   ├── strategies/  # 11 strategies + registry, payoff/Greek analytics
-│   ├── option_chain.py   # Tidy DataFrame wrapper (lingua franca)
-│   └── mock_provider.py  # Synthetic chain from live Yahoo spot
-├── pipelines/     # Master pipeline: Data → Ideas → Portfolio → Risk
-└── dashboard/     # 12-page Dash application (dark theme)
+config/          Universe (50 tickers), sectors, settings
+data/            yfinance loader (robust MultiIndex handling, caching)
+backtesting/     Walk-forward engine (net of costs), strategy pipelines, HRP
+execution/       IBKR live engine, rebalancer (signal → orders)
+options/         Black-Scholes, Greeks, implied vol, 11 strategies, vol surface
+dashboard/       Dash app: 13 pages, callbacks, router, decision-score engine
+run_dashboard.py Entry point
 ```
 
 ---
 
-## Roadmap
+## Installation
 
-- [ ] Custom pair-trade backtesting wired into the Math Lab (e.g. Long Toyota / Short Honda)
-- [ ] Cointegration-based pairs scanner across the full Nikkei 225
-- [ ] Live option chains via IBKR (the provider interface is already in place)
-- [ ] Factor regime detection (risk-on / risk-off auto-switching)
-- [ ] Multi-strategy portfolio with correlation-aware position sizing
+```bash
+git clone https://github.com/vdswmart-beep/stoxx50-ls-platform.git
+cd stoxx50-ls-platform
+python -m venv venv && source venv/bin/activate
+pip install -r requirements.txt   # requires yfinance >= 1.5.1
+```
+
+## Running
+
+```bash
+# Backtest mode (simulation, no broker)
+python run_dashboard.py --mode backtest
+
+# Live mode (real IBKR paper account; TWS open, API enabled on port 7497)
+ulimit -n 4096 && python run_dashboard.py --mode live
+```
+
+Open http://127.0.0.1:8050.
+
+### Live execution setup (Interactive Brokers)
+1. Open Trader Workstation (TWS), log into the **paper** account.
+2. File → Global Configuration → API → Settings → enable "ActiveX and Socket Clients", port **7497**.
+3. Launch with `--mode live`; use the **Rebalancing** tab to route the target portfolio.
+
+---
+
+## Validation scripts
+
+```bash
+python audit_backtest.py       # walk-forward metrics + per-window breakdown
+python test_robustness.py      # sensitivity to parameters, per-year stability
+python test_ic.py              # Information Coefficient per factor
+python test_frequency.py       # rebalancing frequency: turnover & net-of-cost Sharpe
+python test_strategies_full.py # momentum vs multi-factor vs HRP
+```
+
+---
+
+## Key technical choices
+
+- **Walk-forward, not in-sample** — weights computed only on the training window, tested
+  on the following unseen window. No look-ahead bias.
+- **Costs modelled** — the backtest subtracts turnover-based costs, so Sharpe is net.
+- **Genuine HRP** — López de Prado's algorithm (correlation distance → hierarchical
+  clustering → quasi-diagonalisation → recursive bisection).
+- **Single-threaded server in live mode** — `ib_insync` is not thread-safe; the server
+  runs single-threaded when connected so orders execute in the connection thread.
+- **MARKET → LIMIT conversion** — without a real-time European data subscription, market
+  orders become tick-size-aligned aggressive limit orders using a reference price.
+
+---
+
+## Limitations (honest scope)
+
+- **Market data.** The IBKR paper account has no real-time European data subscription, so
+  European orders fill at market open rather than instantly, and the options desk runs on
+  theoretical (Black-Scholes) inputs rather than live market implied volatility.
+- **Fundamentals.** The multi-factor signal uses price-based factors only (momentum,
+  low-vol, reversal). Value/quality need point-in-time historical fundamentals not
+  reliably available from the free data source, so they inform live scoring but are not
+  backtested.
+- **Universe.** Fixed to the 50 current EURO STOXX 50 members — no survivorship-bias-free
+  historical index reconstitution.
 
 ---
 
 ## Disclaimer
 
-This project is built for educational and research purposes. The signals and option prices generated do not constitute investment advice. Always validate strategies in paper trading before deploying real capital. Trading involves risk of loss.
-
----
-
-*Built with Python 3.12 — Nikkei 225 Long/Short Equity Research & Derivatives Platform*
+Personal research project. Paper trading only — not investment advice. Past backtested
+performance does not guarantee future results.

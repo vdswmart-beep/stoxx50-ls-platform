@@ -30,7 +30,7 @@ def build_dashboard(data_provider=None, exec_engine=None, stop_loss_pct=0.06):
             "https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap",
         ],
         suppress_callback_exceptions=True,
-        title="NK225 Platform",
+        title="STOXX50 Platform",
     )
 
     dp = data_provider

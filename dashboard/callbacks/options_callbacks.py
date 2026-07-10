@@ -134,12 +134,14 @@ def register_options_callbacks(app, dp, exec_engine=None):
     )
     def render_subtab(active_tab):
         from dashboard.pages.options_lab import (
-            _tab_pricer, _tab_greeks, _tab_strategies, _tab_parity, _tab_surface
+            _tab_pricer, _tab_greeks, _tab_strategies, _tab_parity, _tab_surface,
+            _tab_structured
         )
         return {
             "pricer":     _tab_pricer,
             "greeks":     _tab_greeks,
             "strategies": _tab_strategies,
+            "structured": _tab_structured,
             "parity":     _tab_parity,
             "surface":    _tab_surface,
         }.get(active_tab, _tab_pricer)()
@@ -587,3 +589,202 @@ def register_options_callbacks(app, dp, exec_engine=None):
             logger.error(f"render_surface: {e}", exc_info=True)
             empty = go.Figure().update_layout(**_layout(320))
             return empty, empty, empty
+
+
+    # ═══════════════════════════════════════════════════════════════
+    # ONGLET PRODUITS STRUCTURÉS
+    # ═══════════════════════════════════════════════════════════════
+    from dash import ALL, ctx as _ctx
+
+    # Store des legs (liste de dicts)
+    @app.callback(
+        Output("struct-legs-container", "children"),
+        Input("struct-add-leg", "n_clicks"),
+        Input({"type": "struct-leg-del", "idx": ALL}, "n_clicks"),
+        Input("preset-capital-protected", "n_clicks"),
+        Input("preset-reverse-conv", "n_clicks"),
+        Input("preset-autocall", "n_clicks"),
+        Input("preset-bonus", "n_clicks"),
+        State("struct-legs-container", "children"),
+        State("opt-underlying", "value"),
+        prevent_initial_call=True,
+    )
+    def manage_struct_legs(add, dels, p_cap, p_rev, p_auto, p_bonus, current, symbol):
+        from dashboard.pages.options_lab import _leg_row
+        trig = _ctx.triggered_id
+
+        # Spot approximatif pour des strikes par défaut sensés
+        try:
+            spot = _chain_for(symbol).spot
+        except Exception:
+            spot = 100.0
+        s = round(spot)
+
+        # ── Presets : produits structurés classiques ──
+        if trig == "preset-capital-protected":
+            # Zéro-coupon (approx via cash) + call ATM long → capital garanti + upside
+            return [_leg_row(0, "underlying", s, 0),
+                    _leg_row(1, "call", s, 1)]
+        if trig == "preset-reverse-conv":
+            # Long sous-jacent + short put OTM → coupon élevé, risque à la baisse
+            return [_leg_row(0, "underlying", s, 1),
+                    _leg_row(1, "put", round(s*0.9), 1)]
+        if trig == "preset-autocall":
+            # Approx : long sous-jacent + short call (plafonne) + short put (barrière)
+            return [_leg_row(0, "underlying", s, 1),
+                    _leg_row(1, "call", round(s*1.1), 1),
+                    _leg_row(2, "put", round(s*0.7), 1)]
+        if trig == "preset-bonus":
+            # Bonus certificate : long sous-jacent + long put OTM (protection) financé
+            return [_leg_row(0, "underlying", s, 1),
+                    _leg_row(1, "put", round(s*0.85), 1)]
+
+        # ── Suppression d'un leg précis (par son idx) ──
+        if isinstance(trig, dict) and trig.get("type") == "struct-leg-del":
+            del_idx = trig["idx"]
+            rows = current or []
+            kept = []
+            for c in rows:
+                # L'idx est encodé dans l'id du bouton × de chaque row
+                try:
+                    row_children = c["props"]["children"][1]["props"]["children"]
+                    del_btn = row_children[-1]
+                    row_idx = del_btn["props"]["id"]["idx"]
+                except Exception:
+                    row_idx = None
+                if row_idx != del_idx:
+                    kept.append(c)
+            return kept
+
+        # ── Ajout d'un leg ──
+        current = current or []
+        idx = len(current)
+        current.append(_leg_row(idx, "call", s, 1))
+        return current
+
+    # Construire le produit structuré + payoff zoomé
+    @app.callback(
+        Output("struct-cost", "children"),      Output("struct-maxprofit", "children"),
+        Output("struct-maxloss", "children"),   Output("struct-delta", "children"),
+        Output("struct-legs-summary", "children"), Output("struct-payoff", "figure"),
+        Input("struct-btn", "n_clicks"),
+        Input("struct-zoom", "value"),
+        State("opt-underlying", "value"),
+        State("struct-expiry", "value"),
+        State({"type": "struct-leg-kind", "idx": ALL}, "value"),
+        State({"type": "struct-leg-side", "idx": ALL}, "value"),
+        State({"type": "struct-leg-strike", "idx": ALL}, "value"),
+        State({"type": "struct-leg-qty", "idx": ALL}, "value"),
+        prevent_initial_call=True,
+    )
+    def build_structured(n, zoom, symbol, dte, kinds, sides, strikes, qtys):
+        if not kinds:
+            empty = go.Figure().update_layout(**_layout(400))
+            return "—", "—", "—", "—", "Ajoute des composants puis clique Construire.", empty
+        try:
+            import numpy as np
+            from options.strategies.base import OptionLeg, Strategy
+            from options.pricing.black_scholes import BlackScholes
+            from options.pricing.implied_vol import OptionType
+
+            spot = _chain_for(symbol).spot
+            T = float(dte) / 365.0
+            rate = 0.03
+            vol = 0.25  # vol par défaut ; le pricer réel utilise la surface
+            sym = "€"
+
+            legs = []
+            for kind, side, strike, qty in zip(kinds, sides, strikes, qtys):
+                q = float(qty or 0) * (1 if side == "long" else -1)
+                if q == 0:
+                    continue
+                if kind == "underlying":
+                    legs.append(OptionLeg.underlying(quantity=q, premium=spot))
+                else:
+                    K = float(strike or spot)
+                    prem = float(BlackScholes.price(spot, K, T, rate, vol,
+                                 option_type=OptionType.parse(kind)))
+                    legs.append(OptionLeg.option(kind, K, T, q, prem, vol))
+
+            if not legs:
+                empty = go.Figure().update_layout(**_layout(400))
+                return "—", "—", "—", "—", "Aucun composant valide.", empty
+
+            strat = Strategy(name="Produit structuré", legs=legs, spot=spot,
+                             rate=rate, dividend=0.0)
+            cost = strat.net_cost()
+            try:    mp = strat.max_profit()
+            except Exception: mp = float("nan")
+            try:    ml = strat.max_loss()
+            except Exception: ml = float("nan")
+            g = strat.greeks()
+
+            # ── Grille de payoff avec ZOOM ──
+            if zoom == "20":
+                lo, hi = spot*0.80, spot*1.20
+            elif zoom == "10":
+                lo, hi = spot*0.90, spot*1.10
+            else:  # auto : autour des strikes + spot
+                ks = [float(s) for s, k in zip(strikes, kinds) if k != "underlying" and s] + [spot]
+                lo, hi = min(ks)*0.75, max(ks)*1.25
+            grid = np.linspace(lo, hi, 400)
+            payoff = strat.payoff(grid)
+            pnl = payoff - cost
+
+            fig = go.Figure()
+            # Zones profit/perte colorées
+            fig.add_trace(go.Scatter(x=grid, y=np.maximum(pnl, 0), mode="lines", line=dict(width=0),
+                                     fill="tozeroy", fillcolor="rgba(74,222,128,0.15)",
+                                     hoverinfo="skip", showlegend=False))
+            fig.add_trace(go.Scatter(x=grid, y=np.minimum(pnl, 0), mode="lines", line=dict(width=0),
+                                     fill="tozeroy", fillcolor="rgba(248,113,113,0.15)",
+                                     hoverinfo="skip", showlegend=False))
+            # Courbe P&L
+            fig.add_trace(go.Scatter(x=grid, y=pnl, mode="lines", name="P&L net",
+                                     line=dict(color=_TEXT, width=2.4),
+                                     hovertemplate=f"S_T {sym}%{{x:.1f}}<br>P&L {sym}%{{y:.2f}}<extra></extra>"))
+            # Ligne zéro ÉPAISSE et visible (le point clé de ta demande)
+            fig.add_hline(y=0, line_color="#4a9eff", line_width=1.5)
+            # Spot
+            fig.add_vline(x=spot, line_dash="dot", line_color=_MUTED,
+                          annotation_text="spot", annotation_font_size=9)
+            # Strikes marqués
+            for st, k in zip(strikes, kinds):
+                if k != "underlying" and st:
+                    fig.add_vline(x=float(st), line_dash="dash", line_color="#c9a84c",
+                                  annotation_text=f"K={st}", annotation_font_size=8)
+            # Break-evens
+            try:
+                for b in strat.breakevens():
+                    if lo <= b <= hi:
+                        fig.add_vline(x=b, line_dash="dot", line_color="#4ade80")
+            except Exception:
+                pass
+
+            lay = _layout(400, "Payoff structuré — P&L net du coût d'entrée")
+            # Symétriser l'axe Y autour de 0 pour bien voir les écarts
+            ymax = float(np.nanmax(np.abs(pnl))) * 1.15 or 1
+            lay["yaxis"]["range"] = [-ymax, ymax]
+            lay["yaxis"]["zerolinewidth"] = 2
+            fig.update_layout(**lay)
+
+            # Résumé des legs
+            leg_desc = []
+            for kind, side, strike, qty in zip(kinds, sides, strikes, qtys):
+                if not qty:
+                    continue
+                sign = "+" if side == "long" else "−"
+                if kind == "underlying":
+                    leg_desc.append(f"{sign}{qty} × sous-jacent @ {sym}{spot:.1f}")
+                else:
+                    leg_desc.append(f"{sign}{qty} × {kind} K={strike}")
+            legs_summary = html.Div([html.Div(d, style={"padding":"3px 0",
+                            "borderBottom":"1px solid #141a22"}) for d in leg_desc])
+
+            fmt = lambda x: f"{sym}{x:.2f}" if x == x else "—"  # NaN-safe
+            return (fmt(cost), fmt(mp), fmt(ml), f"{g.delta:.3f}",
+                    legs_summary, fig)
+        except Exception as e:
+            logger.error(f"build_structured: {e}", exc_info=True)
+            empty = go.Figure().update_layout(**_layout(400))
+            return "—", "—", "—", "—", f"Erreur : {e}", empty
