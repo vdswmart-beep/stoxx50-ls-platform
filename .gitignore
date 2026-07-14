@@ -14,3 +14,23 @@ logs/*.log
 cache/
 *.log
 real_portfolio/
+
+# macOS
+.DS_Store
+**/.DS_Store
+
+# Python
+__pycache__/
+**/__pycache__/
+*.pyc
+*.pyo
+venv*/
+.venv/
+
+# Logs & cache
+logs/*.log
+cache/
+*.log
+
+# Portefeuille reel (argent reel - ne jamais pousser)
+real_portfolio/
